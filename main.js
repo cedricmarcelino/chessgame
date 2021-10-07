@@ -3,6 +3,8 @@ const rowLabel = [8,7,6,5,4,3,2,1]
 rowLabel.toString()
 const columnLabel = ['A','B','C','D','E','F','G','H']
 let counter = 1;
+let dropColorChecker = "white"
+let turn = "white"
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -18,8 +20,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box")
-            box.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            const gridLabel = document.createElement('span')
+            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
+            box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
@@ -47,6 +51,7 @@ let generatorChecker = "white";
 let row1 = ""
 let row2 = ""
 let pieceColor = ""
+let prevBox = ""
 
 function generatePieces(){
     for(let i=0; i<2; i++){
@@ -67,7 +72,21 @@ function generatePieces(){
             const piece = document.createElement('img')
             piece.setAttribute("src",`chesspiece/${pieceColor}pawn.png`)
             piece.setAttribute("class",`${pieceColorClass}piece pawn`)
+            piece.setAttribute("id",`pawn${columnLabel[i]}${row1}`)
+            piece.setAttribute("draggable", "true")
+            piece.addEventListener("dragstart", e=> {
+                e.dataTransfer.setData("text/plain", piece.id)
+                prevBox = e.path[1].id
+                console.log(e)
+                if(e.path[0].classList.contains("blackpiece") === true){
+                    dropColorChecker = "black"
+                }else if(e.path[0].classList.contains("whitepiece") === true) {
+                    dropColorChecker = "white"
+                }
+                
+            })
             box.appendChild(piece)
+            box.classList.add(`takenBy${pieceColorClass}`)
         }
 
         // ROOK GENERATION
@@ -129,3 +148,72 @@ function generatePieces(){
 }
 
 generatePieces()
+
+
+
+// ASSIGNING DROP LISTENER TO BOARD
+
+for (const dropZone of document.querySelectorAll(".box")) {
+
+    dropZone.addEventListener("dragover", e => {
+        e.preventDefault()
+        dropZone.classList.add("drophover")
+    })
+
+
+
+    dropZone.addEventListener("dragleave", e => {
+        dropZone.classList.remove("drophover")
+    })
+    
+    // DROP LISTENER FOR PAWNS
+    dropZone.addEventListener("drop", e=>{
+
+        if(e.path[0].classList.contains(`${dropColorChecker}piece`) === true || e.path[0].classList.contains(`takenBy${dropColorChecker}`)){
+            e.preventDefault()
+            dropZone.classList.remove("drophover")
+        } else{
+            e.preventDefault()
+            dropZone.classList.remove("drophover")
+            const droppedElementId = e.dataTransfer.getData("text/plain")
+            const droppedElement = document.getElementById(droppedElementId)
+            dropZone.appendChild(droppedElement)
+            document.querySelector(`#${prevBox}`).classList.remove(`takenBy${dropColorChecker}`)
+            e.path[0].classList.add(`takenBy${dropColorChecker}`)
+            updateTurn()
+        }
+    })
+}
+
+// UPDATING THE TURN AND DISABLING MOVE FOR OTHER PLAYER
+
+function updateTurn(){
+    if(turn === "white"){
+        turn = "black"
+        disableWhite()
+    } else if(turn === "black"){
+        turn = "white"
+        disableBlack()
+    }
+}
+
+function disableBlack(){
+    for (const blackpiece of document.querySelectorAll(".blackpiece")) {
+        blackpiece.setAttribute("draggable", "false")
+    }
+    for (const whitepiece of document.querySelectorAll(".whitepiece")) {
+        whitepiece.setAttribute("draggable", "true")
+    }
+
+}
+
+function disableWhite(){
+    for (const blackpiece of document.querySelectorAll(".blackpiece")) {
+        blackpiece.setAttribute("draggable", "true")
+    }
+    for (const whitepiece of document.querySelectorAll(".whitepiece")) {
+        whitepiece.setAttribute("draggable", "false")
+    }
+}
+
+disableBlack()

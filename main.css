@@ -45,19 +45,26 @@ body {
     width: 80%;
     height: 80%;
     position: absolute;
-    top: 10%;
-    bottom: 10%;
-    right: 10%;
-    left: 10%;
+    margin-bottom: 10%;
+    margin-right: 10%;
+    margin-left: 10%;
+    margin-top: 10%;
 }
 
 .blackpiece{
     width: 80%;
     height: 80%;
     position: absolute;
-    top: 10%;
-    bottom: 10%;
-    right: 10%;
-    left: 10%;
+    margin-bottom: 10%;
+    margin-right: 10%;
+    margin-left: 10%;
+    margin-top: 10%;
 }
 
+.drophover {
+    border: 4px green solid;
+}
+
+.box > span {
+    position: absolute;
+}
