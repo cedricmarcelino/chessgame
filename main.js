@@ -41,3 +41,91 @@ function generateBoard() {
 }
 
 generateBoard()
+
+// GENERATE CHESS PIECES
+let generatorChecker = "white";
+let row1 = ""
+let row2 = ""
+let pieceColor = ""
+
+function generatePieces(){
+    for(let i=0; i<2; i++){
+        if(generatorChecker === "white"){
+            row1 = "2"
+            row2 = "1"
+            pieceColor = "w"
+            pieceColorClass = "white"
+        }else if (generatorChecker === "black"){
+            row1 = "7"
+            row2 = "8"
+            pieceColor = "b"
+            pieceColorClass = "black"
+        }
+        // PAWN GENERATION
+        for(let i = 0; i < 8; i++){
+            const box = document.querySelector(`#${columnLabel[i]}${row1}`)
+            const piece = document.createElement('img')
+            piece.setAttribute("src",`chesspiece/${pieceColor}pawn.png`)
+            piece.setAttribute("class",`${pieceColorClass}piece pawn`)
+            box.appendChild(piece)
+        }
+
+        // ROOK GENERATION
+        for(let i = 0; i < 8; i++){
+            if( columnLabel[i] === 'A' || columnLabel[i] === 'H'){
+                const box = document.querySelector(`#${columnLabel[i]}${row2}`)
+                const piece = document.createElement('img')
+                piece.setAttribute("src",`chesspiece/${pieceColor}rook.png`)
+                piece.setAttribute("class",`${pieceColorClass}piece rook`)
+                box.appendChild(piece)
+            }
+        }
+
+        // QUEEN GENERATION
+        for(let i = 0; i < 8; i++){
+            if( columnLabel[i] === 'D'){
+                const box = document.querySelector(`#${columnLabel[i]}${row2}`)
+                const piece = document.createElement('img')
+                piece.setAttribute("src",`chesspiece/${pieceColor}queen.png`)
+                piece.setAttribute("class",`${pieceColorClass}piece queen`)
+                box.appendChild(piece)
+            }
+        }
+
+        // KING GENERATION
+        for(let i = 0; i < 8; i++){
+            if( columnLabel[i] === 'E'){
+                const box = document.querySelector(`#${columnLabel[i]}${row2}`)
+                const piece = document.createElement('img')
+                piece.setAttribute("src",`chesspiece/${pieceColor}king.png`)
+                piece.setAttribute("class",`${pieceColorClass}piece king`)
+                box.appendChild(piece)
+            }
+        }
+
+        // BISHOP GENERATION
+        for(let i = 0; i < 8; i++){
+            if( columnLabel[i] === 'C' || columnLabel[i] === 'F'){
+                const box = document.querySelector(`#${columnLabel[i]}${row2}`)
+                const piece = document.createElement('img')
+                piece.setAttribute("src",`chesspiece/${pieceColor}bishop.png`)
+                piece.setAttribute("class",`${pieceColorClass}piece bishop`)
+                box.appendChild(piece)
+            }
+        }
+
+        // HORSE GENERATION
+        for(let i = 0; i < 8; i++){
+            if( columnLabel[i] === 'B' || columnLabel[i] === 'G'){
+                const box = document.querySelector(`#${columnLabel[i]}${row2}`)
+                const piece = document.createElement('img')
+                piece.setAttribute("src",`chesspiece/${pieceColor}horse.png`)
+                piece.setAttribute("class",`${pieceColorClass}piece horse`)
+                box.appendChild(piece)
+            }
+        }
+    generatorChecker = "black"
+    }
+}
+
+generatePieces()

@@ -10,13 +10,14 @@
 }
 
 body {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr 1fr; */
 }
 
 .box {
     width: 4rem;
     height: 4rem;
+    position: relative;
 }
 
 .rowContainer {
@@ -24,11 +25,12 @@ body {
 }
 
 #board {
-    grid-column-start: 2;
+    /* grid-column-start: 2;
     grid-column-end: 3;
     grid-row-start: 1;
-    grid-row-end: 2;
+    grid-row-end: 2; */
     border: 4px solid black;
+    display: inline-block;
 }
 
 .darkbox{
@@ -37,5 +39,25 @@ body {
 
 .lightbox{
     background-color: #E7E7CB;
+}
+
+.whitepiece{
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    right: 10%;
+    left: 10%;
+}
+
+.blackpiece{
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    right: 10%;
+    left: 10%;
 }
 
