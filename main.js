@@ -598,6 +598,9 @@ for (const dropZone of document.querySelectorAll(".box")) {
         })
 
         //RESETS POSSIBLE MOVE ARRAY ON DROP
+
+        
+
         while(possibleMoves.length > 0) {
             possibleMoves.pop();
         }
