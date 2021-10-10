@@ -10,6 +10,8 @@ let possibleMoves = []
 let arrayTest = []
 let eatenPiece = ""
 let sampleEpath = ""
+let prevPiece = ""
+let prevPiecePos = ""
 
 body.addEventListener("mouseup", function(){
     for (const dropZone of document.querySelectorAll(".box")) {
@@ -105,7 +107,7 @@ function generatePieces(){
                 let downCtr = 1
                 let upwardCtr = 1
                 prevBox = currentPos
-
+                prevPiece = e.target
                 // SETTING MOVEMENT FOR PAWNS
 
                 //FIRST MOVE
@@ -181,7 +183,6 @@ function generatePieces(){
         // DEFINING FUNCTION FOR ROOK MOVEMENTS
         const rookMove = function rookMovement(e,piece) {
             e.dataTransfer.setData("text/plain", piece.id)
-            console.log(e)
             let currentPos = e.target.parentElement.id
             let currentPosCol = currentPos[0]
             let colIndex = columnLabel.indexOf(currentPosCol)
@@ -284,7 +285,6 @@ function generatePieces(){
                 
                 piece.addEventListener("dragstart", e => {
                     e.dataTransfer.setData("text/plain", piece.id)
-                    console.log(e)
                     let currentPos = e.target.parentElement.id
                     let currentPosCol = currentPos[0]
                     let colIndex = columnLabel.indexOf(currentPosCol)
@@ -364,7 +364,6 @@ function generatePieces(){
         // DEFINING FUNCTION FOR BISHOP MOVEMENTS
         const bishopMove = function bishopMovement (e, piece){
             e.dataTransfer.setData("text/plain", piece.id)
-            console.log(e)
             let currentPos = e.target.parentElement.id
             let currentPosCol = currentPos[0]
             let colIndex = columnLabel.indexOf(currentPosCol)
@@ -451,7 +450,6 @@ function generatePieces(){
 
                 piece.addEventListener("dragstart", e => {
                     e.dataTransfer.setData("text/plain", piece.id)
-                    console.log(e)
                     let currentPos = e.target.parentElement.id
                     let currentPosCol = currentPos[0]
                     let colIndex = columnLabel.indexOf(currentPosCol)
@@ -465,7 +463,6 @@ function generatePieces(){
                     let downleft2 = 1
                     let downright2 = 1
                     prevBox = currentPos
-                    let possibleCapture = false
 
                     //SETTING MOVEMENT FOR HORSE 1
 
@@ -557,7 +554,6 @@ for (const dropZone of document.querySelectorAll(".box")) {
     // DROP LISTENERS
     dropZone.addEventListener("drop", e=>{ 
         dropZone.classList.remove("drophover")
-        console.log(e)
         if(e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`)){
             e.preventDefault()
             dropZone.classList.remove("drophover")
@@ -577,7 +573,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
 
             //REMOVING FIRST MOVE CLASS FOR PAWNS THAT HAS BEEN MOVED ALREADY
             droppedElement.classList.remove("firstmove")
-            console.log(e)
+            prevPiecePos = prevPiece.parentElement.id
             //ITERATE ON E.PATH TO CHECK FOR DIV OF THE CAPTURED ELEMENT
             for(let i = 0 ; i < 5 ; i++){
                 if(e.path[i].classList.contains(`takenBy${oppositeTurn}`) && e.path[i].classList.contains(`box`)){
@@ -598,8 +594,6 @@ for (const dropZone of document.querySelectorAll(".box")) {
         })
 
         //RESETS POSSIBLE MOVE ARRAY ON DROP
-
-        
 
         while(possibleMoves.length > 0) {
             possibleMoves.pop();
@@ -666,17 +660,27 @@ function takenBoxClassGenerator() {
     })
 }
 
-
-// SETTING MOVEMENT FOR ROOK
-
-const badung = function rookMovement(e) {
-
+function checkPieceLocation() {
+    let pieces = document.querySelectorAll("img")
+    pieces.forEach(function (piece){
+        let currPosOfPiece = piece.parentElement.id
+        let letter = currPosOfPiece[0]
+        let number = currPosOfPiece[1]
+        let newNumber = newRowLabel.indexOf(number)
+        testBoard2[newNumber][letter] = piece.id
+    })
 }
 
+let newRowLabel = ["0","8","7","6","5","4","3","2","1",]
 
-//BISHOP
-//ROOK
-//KING
-//QUEEN
-//HORSE
-//PAWN LEFT FOR EATING MECHANICS
+let testBoard2 = [
+    {},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
+    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""}
+]
