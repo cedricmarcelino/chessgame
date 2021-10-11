@@ -253,32 +253,66 @@ for (const dropZone of document.querySelectorAll(".box")) {
                 if((e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`))){
                 const droppedElementId = e.dataTransfer.getData("text/plain")
                 const droppedElement = document.getElementById(droppedElementId)
-                dropZone.appendChild(droppedElement)
-                captured = false
-                legalMove(e,droppedElement)
-                if(checked===true && turn === "black" && checkedKing === "kingE1"){
-                    prevBox.appendChild(dragged)
-                    if(captured === true){
-                        prevCapturedContainer.appendChild(prevCaptured)
-                        captured = false
-                    }
-                    updateTurn()
-                    posSetter()
-                    checkPieceMoves()
-                    isChecked()
-                }
-                if(checked===true && turn === "white" && checkedKing === "kingE8"){
-                    prevBox.appendChild(dragged)
-                    if(captured === true){
-                        prevCapturedContainer.appendChild(prevCaptured)
-                        captured = false
-                    }
-                    updateTurn()
-                    posSetter()
-                    checkPieceMoves()
-                    isChecked()
-                }
+                // captured = false
+                // legalMove(e,droppedElement)
+                // if((checked===true && turn === "black" && checkedKing === "kingE1") || (checked===true && turn === "white" && checkedKing === "kingE8") ){
+                //     prevBox.appendChild(dragged)
+                //     if(captured === true){
+                //         prevCapturedContainer.appendChild(prevCaptured)
+                //         captured = false
+                //     }
+                //     updateTurn()
+                //     posSetter()
+                //     checkPieceMoves()
+                //     isChecked()
+                // }
+
+                // if((checked===true && turn === "white" && checkedKing === "kingE1") || (checked===true && turn === "black" && checkedKing === "kingE8") ){
+                //     prevBox.appendChild(dragged)
+                //     if(captured === true){
+                //         prevCapturedContainer.appendChild(prevCaptured)
+                //         captured = false
+                //     }
+                //     updateTurn()
+                //     posSetter()
+                //     checkPieceMoves()
+                //     isChecked()
+                // }
+                // if(){
+                //     prevBox.appendChild(dragged)
+                //     if(captured === true){
+                //         prevCapturedContainer.appendChild(prevCaptured)
+                //         captured = false
+                //     }
+                //     updateTurn()
+                //     posSetter()
+                //     checkPieceMoves()
+                //     isChecked()
+                // }
                 //FIX PREV CAPTURED SHOWING UP ON NEXT CHECK
+                if(checked === false){
+                    legalMove(e,droppedElement,dropZone)
+                    if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
+                        prevBox.appendChild(dragged)
+                        posSetter()
+                        checkPieceMoves()
+                        updateTurn()
+                    } else {
+
+                    }
+                } else if (checked === true) {
+                    dropZone.appendChild(droppedElement)
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                        if(checked === true){
+                            prevBox.appendChild(dragged)
+                            posSetter()
+                            checkPieceMoves()
+                        } else if (checked === false) {
+                            legalMove(e,droppedElement,dropZone)
+                        }
+                }
             }
             prevCapturedContainer = ""
             prevCaptured = ""
@@ -289,9 +323,11 @@ for (const dropZone of document.querySelectorAll(".box")) {
         })
 }
 
-function legalMove (e,droppedElement){
+function legalMove (e,droppedElement,dropZone){
     //FOR EATEN PIECES
         //ITERATE ON E.PATH TO CHECK FOR DIV OF THE CAPTURED ELEMENT
+        dropZone.appendChild(droppedElement)
+        console.log("fired")
             for(let i = 0 ; i < 5 ; i++){
                 if(e.path[i].tagName == 'IMG'){
                     prevCaptured = e.path[i]
@@ -302,12 +338,10 @@ function legalMove (e,droppedElement){
                     captured = true
                 }
             }
-        
         droppedElement.classList.remove("firstmove")
         posSetter()
         checkPieceMoves()
         isChecked()
-        //CHECK MOVES FOR ALL OF THE PIECE ON THE BOARD
         updateTurn()
 }
 
