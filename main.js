@@ -3,34 +3,28 @@ const rowLabel = [8,7,6,5,4,3,2,1]
 rowLabel.toString()
 const columnLabel = ['A','B','C','D','E','F','G','H']
 let counter = 1;
-let dropColorChecker = "white"
 let turn = "white"
-let oppositeTurn = "black"
-let possibleMoves = []
-let arrayTest = []
-let eatenPiece = ""
-let sampleEpath = ""
-let prevPiece = ""
-let prevPiecePos = ""
-
-body.addEventListener("mouseup", function(){
-    for (const dropZone of document.querySelectorAll(".box")) {
-        dropZone.classList.remove("possibleMove")
-    }
-})
-//GENERATING ARRAY FOR POSITIONS
-const rowsPerBoard = 8; columnsPerBoard = 8;
-
-let board = new Array(rowsPerBoard);            
-for (let r = 0; r < rowsPerBoard; r++) {
-    board[r] = new Array(columnsPerBoard);      
-}
+let checked = false
+let dragged 
+let prevBox
+let checkedKing
+let prevCaptured = ""
+let prevCapturedContainer = ""
+let captured = false
+let checkmate = false
 
 // GENERATE CHESS BOARD
 function generateBoard() {
     const board = document.createElement('div')
     board.setAttribute("id","board")
     body.appendChild(board)
+    const playerTurn = document.createElement('div')
+    playerTurn.setAttribute("id","playerTurn")
+    body.appendChild(playerTurn)
+    const playerTurnLabel = document.createElement('h1')
+    playerTurnLabel.setAttribute("id","playerTurnLabel")
+    playerTurnLabel.innerHTML = "White's Turn"
+    playerTurn.appendChild(playerTurnLabel)
 
     for(let row=0; row<8; row++){
         const rowContainer = document.createElement('div')
@@ -71,7 +65,6 @@ let generatorChecker = "white";
 let row1 = ""
 let row2 = ""
 let pieceColor = ""
-let prevBox = ""
 
 function generatePieces(){
     
@@ -88,7 +81,7 @@ function generatePieces(){
             pieceColorClass = "black"
         }
 
-        // PAWN GENERATION
+        // PAWN GENERATION AND EVENT LISTENERS
         for(let i = 0; i < 8; i++){
             const box = document.querySelector(`#${columnLabel[i]}${row1}`)
             const piece = document.createElement('img')
@@ -97,152 +90,13 @@ function generatePieces(){
             piece.setAttribute("id",`pawn${columnLabel[i]}${row1}`)
             piece.setAttribute("draggable", "true")
             box.appendChild(piece)
+
             piece.addEventListener("dragstart", e => {
                 e.dataTransfer.setData("text/plain", piece.id)
-                let currentPos = e.target.parentElement.id
-                let currentPosCol = currentPos[0]
-                let colIndex = columnLabel.indexOf(currentPosCol)
-                let currentPosRow = parseInt(currentPos[1])
-                let currPiece = e.target
-                let downCtr = 1
-                let upwardCtr = 1
-                prevBox = currentPos
-                prevPiece = e.target
-                // SETTING MOVEMENT FOR PAWNS
-
-                //FIRST MOVE
-                if(currPiece.classList.contains("whitepiece") && currPiece.classList.contains("firstmove")){
-                    //MOVE LOGIC OF PAWN
-                    while(!!document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`) === true && document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains("empty") && upwardCtr < 3){
-                        possibleMoves.push(`${currentPosCol}${currentPosRow+upwardCtr}`)
-                        upwardCtr++
-                    }
-                    //CAPTURE LOGIC OF PAWN
-                    //TO THE UP LEFT
-                    if(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+1}`) === true && document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow+1}`)
-                    }
-                    //TO THE UP RIGHT
-                    if(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+1}`) === true && document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow+1}`)
-                    }
-                    possibleMovesGenerator()
-
-                } else if (currPiece.classList.contains("blackpiece") && currPiece.classList.contains("firstmove")){
-                    while(!!document.getElementById(`${currentPosCol}${currentPosRow-downCtr}`) === true && document.getElementById(`${currentPosCol}${currentPosRow-downCtr}`).classList.contains("empty")&& downCtr < 3){
-                        possibleMoves.push(`${currentPosCol}${currentPosRow-downCtr}`)
-                        downCtr++
-                    }
-                    //CAPTURE LOGIC OF PAWN
-                    if(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-1}`) === true && document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow-1}`)
-                    }
-
-                    if(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-1}`) === true && document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow-1}`)
-                    }
-                    possibleMovesGenerator()
-                }
-
-                //THE REST OF GAME
-                if(currPiece.classList.contains("whitepiece") && !currPiece.classList.contains("firstmove")){
-                    
-                    //MOVE LOGIC OF PAWN
-                    if(!!document.getElementById(`${currentPosCol}${currentPosRow+1}`) === true && document.getElementById(`${currentPosCol}${currentPosRow+1}`).classList.contains("empty")){
-                        possibleMoves.push(`${currentPosCol}${currentPosRow+1}`)
-                    }
-
-                    //CAPTURE LOGIC OF PAWN
-                    if(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+1}`) === true && document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow+1}`)
-                    }
-
-                    if(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+1}`) === true && document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow+1}`)
-                    }
-
-                    possibleMovesGenerator()
-                } else if (currPiece.classList.contains("blackpiece") && !currPiece.classList.contains("firstmove")){
-                    if(!!document.getElementById(`${currentPosCol}${currentPosRow-1}`) === true && document.getElementById(`${currentPosCol}${currentPosRow-1}`).classList.contains("empty")){
-                        possibleMoves.push(`${currentPosCol}${currentPosRow-1}`)
-                    }
-
-                    //CAPTURE LOGIC OF PAWN
-                    if(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-1}`) === true && document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow-1}`)
-                    }
-
-                    if(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-1}`) === true && document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`)){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow-1}`)
-                    }
-                    possibleMovesGenerator()
-                }
+                possibleMovesGenerator(piece)
+                dragged = event.target
+                prevBox = dragged.parentElement
             })
-        }
-
-        // DEFINING FUNCTION FOR ROOK MOVEMENTS
-        const rookMove = function rookMovement(e,piece) {
-            e.dataTransfer.setData("text/plain", piece.id)
-            let currentPos = e.target.parentElement.id
-            let currentPosCol = currentPos[0]
-            let colIndex = columnLabel.indexOf(currentPosCol)
-            let currentPosRow = parseInt(currentPos[1])
-            let upwardCtr = 1
-            let downwardCtr = 1
-            let leftCtr = 1
-            let rightCtr = 1
-            prevBox = currentPos
-            let possibleCapture = false
-
-            // SETTING MOVEMENT FOR ROOK
-
-            //UPWARD
-            while(!!document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`) === true && (document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains("empty") || document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-
-                possibleMoves.push(`${currentPosCol}${currentPosRow+upwardCtr}`)
-                upwardCtr++
-            }
-            possibleCapture = false
-            //DOWNWARD
-            while(!!document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`) === true && (document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`).classList.contains("empty") || document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-
-                possibleMoves.push(`${currentPosCol}${currentPosRow-downwardCtr}`)
-                downwardCtr++
-            }
-
-            possibleCapture = false
-            //LEFT
-            while(!!document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`) === true && (document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-
-                possibleMoves.push(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`)
-                leftCtr++
-            }
-
-            possibleCapture = false
-            //RIGHT
-            while(!!document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`) === true && (document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-
-                possibleMoves.push(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`)
-                rightCtr++
-            }
-            possibleCapture = false
-            possibleMovesGenerator()
         }
 
         // ROOK GENERATION
@@ -255,7 +109,13 @@ function generatePieces(){
                 piece.setAttribute("class",`${pieceColorClass}piece rook`)
                 piece.setAttribute("id",`rook${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
-                piece.addEventListener("dragstart", function(e) {rookMove(e,piece)})
+
+                piece.addEventListener("dragstart", e => {
+                    e.dataTransfer.setData("text/plain", piece.id)
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
+                })
             }
         }
 
@@ -268,8 +128,13 @@ function generatePieces(){
                 piece.setAttribute("class",`${pieceColorClass}piece queen`)
                 piece.setAttribute("id",`queen${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
-                piece.addEventListener("dragstart", function(e) {rookMove(e,piece)})
-                piece.addEventListener("dragstart", function(e) {bishopMove(e,piece)})
+
+                piece.addEventListener("dragstart", e => {
+                    e.dataTransfer.setData("text/plain", piece.id)
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
+                })
             }
         }
 
@@ -282,147 +147,14 @@ function generatePieces(){
                 piece.setAttribute("class",`${pieceColorClass}piece king`)
                 piece.setAttribute("id",`king${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
-                
+
                 piece.addEventListener("dragstart", e => {
                     e.dataTransfer.setData("text/plain", piece.id)
-                    let currentPos = e.target.parentElement.id
-                    let currentPosCol = currentPos[0]
-                    let colIndex = columnLabel.indexOf(currentPosCol)
-                    let currentPosRow = parseInt(currentPos[1])
-                    let upwardCtr = 1
-                    let downwardCtr = 1
-                    let leftCtr = 1
-                    let rightCtr = 1
-                    let upleftCtr = 1
-                    let uprightCtr = 1
-                    let downleft = 1
-                    let downright = 1
-                    prevBox = currentPos
-    
-                    // SETTING MOVEMENT FOR KING
-    
-                    //UPWARD
-                    while(!!document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`) === true && (document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains("empty") || document.getElementById(`${currentPosCol}${currentPosRow+upwardCtr}`).classList.contains(`takenBy${oppositeTurn}`)) && upwardCtr === 1){
-
-                        possibleMoves.push(`${currentPosCol}${currentPosRow+upwardCtr}`)
-                        upwardCtr++
-                    }
-    
-                    //DOWNWARD
-                    while(!!document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`) === true && downwardCtr === 1 && (document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`).classList.contains("empty") || document.getElementById(`${currentPosCol}${currentPosRow-downwardCtr}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${currentPosCol}${currentPosRow-downwardCtr}`)
-                        downwardCtr++
-                    }
-    
-                    //LEFT
-                    while(!!document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`) === true && leftCtr === 1 && (document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-leftCtr]}${currentPosRow}`)
-                        leftCtr++
-                    }
-    
-                    //RIGHT
-                    while(!!document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`) === true && rightCtr === 1 && (document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+rightCtr]}${currentPosRow}`)
-                        rightCtr++
-                    }
-                    
-                    //DIAGONAL UPLEFT
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`) === true && upleftCtr === 1 && (document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`)
-                        upleftCtr++
-                    }
-
-                    //DIAGONAL UPRIGHT
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`) === true && uprightCtr === 1 && (document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`)
-                        uprightCtr++
-                    }
-
-                    //DIAGONAL DOWNRIGHT
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`) === true && downright === 1 && (document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`)
-                        downright++
-                    }
-
-
-                    //DIAGONAL DOWNLEFT
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`) === true && downleft === 1 && (document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`)
-                        downleft++
-                    }
-                    possibleMovesGenerator()
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
                 })
             }
-
-            
-        }
-
-        // DEFINING FUNCTION FOR BISHOP MOVEMENTS
-        const bishopMove = function bishopMovement (e, piece){
-            e.dataTransfer.setData("text/plain", piece.id)
-            let currentPos = e.target.parentElement.id
-            let currentPosCol = currentPos[0]
-            let colIndex = columnLabel.indexOf(currentPosCol)
-            let currentPosRow = parseInt(currentPos[1])
-            let upleftCtr = 1
-            let uprightCtr = 1
-            let downleft = 1
-            let downright = 1
-            prevBox = currentPos
-            let possibleCapture = false
-
-            //DIAGONAL UPLEFT
-
-            while(!!document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`) === true && (document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-                possibleMoves.push(`${columnLabel[colIndex-upleftCtr]}${currentPosRow+upleftCtr}`)
-                upleftCtr++
-            }
-
-            possibleCapture = false
-            //DIAGONAL UPRIGHT
-
-            while(!!document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`) === true && (document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-                possibleMoves.push(`${columnLabel[colIndex+uprightCtr]}${currentPosRow+uprightCtr}`)
-                uprightCtr++
-            }
-
-            possibleCapture = false
-            //DIAGONAL DOWNRIGHT
-
-            while(!!document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`) === true && (document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-                possibleMoves.push(`${columnLabel[colIndex+downright]}${currentPosRow-downright}`)
-                downright++
-            }
-
-            possibleCapture = false
-            //DIAGONAL DOWNLEFT
-
-            while(!!document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`) === true  && (document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`).classList.contains(`takenBy${oppositeTurn}`)) && possibleCapture === false){
-
-                if(document.getElementById(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`).classList.contains(`takenBy${oppositeTurn}`)){
-                    possibleCapture = true
-                }
-                possibleMoves.push(`${columnLabel[colIndex-downleft]}${currentPosRow-downleft}`)
-                downleft++
-            }
-            possibleCapture = false
-            possibleMovesGenerator()
         }
 
         // BISHOP GENERATION
@@ -434,7 +166,13 @@ function generatePieces(){
                 piece.setAttribute("class",`${pieceColorClass}piece bishop`)
                 piece.setAttribute("id",`bishop${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
-                piece.addEventListener("dragstart", function(e) {bishopMove(e,piece)})
+
+                piece.addEventListener("dragstart", e => {
+                    e.dataTransfer.setData("text/plain", piece.id)
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
+                })
             }
         }
 
@@ -450,174 +188,641 @@ function generatePieces(){
 
                 piece.addEventListener("dragstart", e => {
                     e.dataTransfer.setData("text/plain", piece.id)
-                    let currentPos = e.target.parentElement.id
-                    let currentPosCol = currentPos[0]
-                    let colIndex = columnLabel.indexOf(currentPosCol)
-                    let currentPosRow = parseInt(currentPos[1])
-                    let upleftCtr = 1
-                    let uprightCtr = 1
-                    let downleft = 1
-                    let downright = 1
-                    let upleftCtr2 = 1
-                    let uprightCtr2 = 1
-                    let downleft2 = 1
-                    let downright2 = 1
-                    prevBox = currentPos
-
-                    //SETTING MOVEMENT FOR HORSE 1
-
-                    //DIAGONAL UPLEFT 1
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+2}`) === true && upleftCtr===1 && (document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+2}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow+2}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow+2}`)
-                        upleftCtr++
-                    }
-
-                    //DIAGONAL UPRIGHT 1
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+2}`) === true && uprightCtr===1 && (document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+2}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow+2}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow+2}`)
-                        uprightCtr++
-                    }
-
-                    //DIAGONAL DOWNRIGHT 1
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-2}`) === true && downright===1 && (document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-2}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+1]}${currentPosRow-2}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+1]}${currentPosRow-2}`)
-                        downright++
-                    }
-
-                    //DIAGONAL DOWNLEFT 1
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-2}`) === true && downleft===1 && (document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-2}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-1]}${currentPosRow-2}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-1]}${currentPosRow-2}`)
-                        downleft++
-                    }
-
-                    //SETTING MOVEMENT FOR HORSE 2
-
-                    //DIAGONAL UPLEFT 2
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow+1}`) === true && upleftCtr2===1 && (document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow+1}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-2]}${currentPosRow+1}`)
-                        upleftCtr2++
-                    }
-
-                    //DIAGONAL UPRIGHT 2
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow+1}`) === true && uprightCtr2===1 && (document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow+1}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow+1}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+2]}${currentPosRow+1}`)
-                        uprightCtr2++
-                    }
-
-                    //DIAGONAL DOWNRIGHT 2
-
-                    while(!!document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow-1}`) === true && downright2===1 && (document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow-1}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex+2]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex+2]}${currentPosRow-1}`)
-                        downright2++
-                    }
-
-                    //DIAGONAL DOWNLEFT 2
-
-                    while(!!document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow-1}`) === true && downleft2===1 && (document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow-1}`).classList.contains("empty") || document.getElementById(`${columnLabel[colIndex-2]}${currentPosRow-1}`).classList.contains(`takenBy${oppositeTurn}`))){
-                        possibleMoves.push(`${columnLabel[colIndex-2]}${currentPosRow-1}`)
-                        downleft2++
-                    }
-                    possibleMovesGenerator()
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
                 })
             }
         }
-    generatorChecker = "black"
+        generatorChecker = "black"
     }
 }
 
 generatePieces()
-takenBoxClassGenerator()
 
-// ASSIGNING DROP LISTENER TO BOARD
 
+
+let board = [
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ["empty","empty","empty","empty","empty","empty","empty","empty",],
+]
+
+let possibleMoves = {}
+
+
+let column = {"A": "0","B": "1","C": "2","D": "3","E": "4","F": "5","G": "6","H": "7"}
+let row = {"8": "0","7": "1","6": "2","5": "3","4": "4","3": "5","2": "6","1": "7"}
+let lastPieceMoved = ""
+
+function posSetter (){
+    resetBoard()
+    const pieces = document.querySelectorAll("img")
+    pieces.forEach(function (piece) {
+        const posID = piece.parentElement.id
+        const posColumn = posID[0]
+        const posRow = posID[1]
+        board[row[posRow]][column[posColumn]] = piece.id
+    })
+}
+
+function resetBoard () {
+    board = [
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+        ["empty","empty","empty","empty","empty","empty","empty","empty",],
+    ]
+}
+
+posSetter()
+
+
+//ASSIGNING DROP ZONES
 for (const dropZone of document.querySelectorAll(".box")) {
-
-    
-
     dropZone.addEventListener("dragover", e => {
         e.preventDefault()
         dropZone.classList.add("drophover")
     })
 
-
-
     dropZone.addEventListener("dragleave", e => {
         dropZone.classList.remove("drophover")
     })
-
-    // DROP LISTENERS
-    dropZone.addEventListener("drop", e=>{ 
-        dropZone.classList.remove("drophover")
-        if(e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`)){
+        dropZone.addEventListener("drop", e=>{ 
             e.preventDefault()
             dropZone.classList.remove("drophover")
-            const droppedElementId = e.dataTransfer.getData("text/plain")
-            const droppedElement = document.getElementById(droppedElementId)
-            dropZone.appendChild(droppedElement)
+                if((e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`))){
+                const droppedElementId = e.dataTransfer.getData("text/plain")
+                const droppedElement = document.getElementById(droppedElementId)
 
-            //ITERATE ON E.PATH TO CHECK FOR DIV AND ADD/REMOVE SPECIFIC CLASSES
-            for(let i = 0 ; i < 5 ; i++){
-                if(e.path[i].classList.contains(`empty`) && e.path[i].classList.contains(`box`)){
-                    e.path[i].classList.add(`takenBy${dropColorChecker}`)
-                    e.path[i].classList.remove(`empty`)
+                if(checked === false){
+                    legalMove(e,droppedElement,dropZone)
+                    if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
+                        prevBox.appendChild(dragged)
+                        posSetter()
+                        checkPieceMoves()
+                        updateTurn()
+                    } else {
+                        
+                    }
+                } else if (checked === true) {
+                    dropZone.appendChild(droppedElement)
+                    
+                    for(let i = 0 ; i < 5 ; i++){
+                        if(e.path[i].tagName == 'IMG'){
+                            prevCaptured = e.path[i]
+                            prevCapturedContainer = prevCaptured.parentElement
+                            e.path[i].remove()
+                            const eatenPice = e.path[i].id
+                            delete possibleMoves[eatenPice]
+                            captured = true
+                        }
+                    }
+        
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                        if(checked === true){
+                            prevBox.appendChild(dragged)
+                            prevCapturedContainer.appendChild(prevCaptured)
+                            posSetter()
+                            checkPieceMoves()
+                            console.log("Olleh")
+                        } else if (checked === false) {
+                            legalMove(e,droppedElement,dropZone)
+                        }
                 }
             }
-            document.getElementById(prevBox).classList.remove(`takenBy${dropColorChecker}`)
-            document.getElementById(prevBox).classList.add(`empty`)
-
-            //REMOVING FIRST MOVE CLASS FOR PAWNS THAT HAS BEEN MOVED ALREADY
-            droppedElement.classList.remove("firstmove")
-            prevPiecePos = prevPiece.parentElement.id
-            //ITERATE ON E.PATH TO CHECK FOR DIV OF THE CAPTURED ELEMENT
-            for(let i = 0 ; i < 5 ; i++){
-                if(e.path[i].classList.contains(`takenBy${oppositeTurn}`) && e.path[i].classList.contains(`box`)){
-                    e.path[i].childNodes[1].remove()
-                    e.path[i].classList.add(`takenBy${dropColorChecker}`)
-                    e.path[i].classList.remove(`takenBy${oppositeTurn}`)
-                }
-            }
-
-            //UPDATING THE TURN
-            updateTurn()
-            
-        }
-
-        //RESETS POSSIBLE MOVE CLASS ON DROP
-        document.querySelectorAll(".box").forEach(function (item) {
+            prevCapturedContainer = ""
+            prevCaptured = ""
+            //RESETS POSSIBLE MOVE CLASS ON DROP
+            document.querySelectorAll(".box").forEach(function (item) {
             item.classList.remove("possibleMove")
+            })
         })
-
-        //RESETS POSSIBLE MOVE ARRAY ON DROP
-
-        while(possibleMoves.length > 0) {
-            possibleMoves.pop();
-        }
-
-        //RESETS EATEN PIECE
-
-        eatenPiece = ""
-    })
 }
+
+function legalMove (e,droppedElement,dropZone){
+    //FOR EATEN PIECES
+        //ITERATE ON E.PATH TO CHECK FOR DIV OF THE CAPTURED ELEMENT
+        dropZone.appendChild(droppedElement)
+            for(let i = 0 ; i < 5 ; i++){
+                if(e.path[i].tagName == 'IMG'){
+                    prevCaptured = e.path[i]
+                    prevCapturedContainer = prevCaptured.parentElement
+                    e.path[i].remove()
+                    const eatenPice = e.path[i].id
+                    delete possibleMoves[eatenPice]
+                    captured = true
+                }
+            }
+        droppedElement.classList.remove("firstmove")
+        posSetter()
+        checkPieceMoves()
+        isChecked()
+        updateTurn()
+        if(checked === true){
+            isCheckmate()
+        }
+}
+
+//ITERATE THROUGH POSSIBLE MOVES
+function possibleMovesGenerator(piece){
+
+    if(possibleMoves[piece.id] === undefined){
+
+    } else {
+        possibleMoves[piece.id].forEach(function (item){
+            const moveRow = item[0]
+            const finalRow = getKeyByValue(row, moveRow)
+            const moveCol = item[1]
+            const finalCol = getKeyByValue(column, moveCol)
+            document.getElementById(`${finalCol}${finalRow}`).classList.add("possibleMove")
+        })
+    }
+    
+}
+
+function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+  }
+
+//PAWN MOVE LOGIC
+function checkPawnMoves() {
+//ITERATE OVER PIECES AND CHECK IF PAWN
+    for (let row = 0; row < 8; row++){
+        for (let col = 0; col < 8; col++){
+            const piece = document.getElementById(`${board[row][col]}`)
+            const keyName = board[row][col]
+            if(!!piece === true){
+                if(piece.classList.contains("whitepiece") && piece.classList.contains("pawn")){
+                    let pieceMove = []
+                    let pawnMove = []
+                    upMovement(pieceMove,row,col,piece)
+                    possibleMoves[keyName] = pieceMove
+                    //
+                    if(piece.classList.contains("firstmove")=== true && possibleMoves[keyName][1] !== undefined){
+                        //possibleMoves[keyName] = [possibleMoves[keyName][0],possibleMoves[keyName][1]]
+                        if(possibleMoves[keyName][0] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][0])
+                        }
+                        if(possibleMoves[keyName][1] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][1])
+                        }
+                    }
+                    else{
+                        //possibleMoves[keyName] = [possibleMoves[keyName][0]]
+                        if(possibleMoves[keyName][0] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][0])
+                        }
+                    }
+
+                    //UP LEFT CAPTURE
+                    if(col > 0 && row > 0){
+                        let possibleCapture = document.getElementById(`${board[row-1][col-1]}`)
+                        if(board[row-1][col-1] !== "empty"){
+                            if(piece.classList[0] !== possibleCapture.classList[0]){
+                                pawnMove.push(`${[row-1]}${[col-1]}`)
+                            }
+                        }
+                    }
+                    //UP RIGHT CAPTURE
+                    if(col < 7 && row > 0){
+                        let possibleCapture = document.getElementById(`${board[row-1][col+1]}`)
+                        if(board[row-1][col+1] !== "empty"){
+                            if(piece.classList[0] !== possibleCapture.classList[0]){
+                                pawnMove.push(`${[row-1]}${[col+1]}`)
+                            }
+                        }
+                    }
+                    possibleMoves[keyName] = pawnMove
+                } else if (piece.classList.contains("blackpiece") && piece.classList.contains("pawn")) {
+                    let pieceMove = []
+                    let pawnMove = []
+                    downMovement(pieceMove,row,col,piece)
+                    possibleMoves[keyName] = pieceMove
+
+                    if(piece.classList.contains("firstmove")=== true && possibleMoves[keyName][1] !== undefined){
+                        //possibleMoves[keyName] = [possibleMoves[keyName][0],possibleMoves[keyName][1]]
+                        if(possibleMoves[keyName][0] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][0])
+                        }
+
+                        if(possibleMoves[keyName][1] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][1])
+                        }
+                    }
+                    else{
+                        //possibleMoves[keyName] = [possibleMoves[keyName][0]]
+                        if(possibleMoves[keyName][0] !== undefined){
+                            pawnMove.push(possibleMoves[keyName][0])
+                        }
+                    }
+
+                    //DOWN LEFT CAPTURE
+                    if(col > 0 && row < 7){
+                        let possibleCapture = document.getElementById(`${board[row+1][col-1]}`)
+                        if(board[row+1][col-1] !== "empty"){
+                            if(piece.classList[0] !== possibleCapture.classList[0]){
+                                pawnMove.push(`${[row+1]}${[col-1]}`)
+                            }
+                        }
+                    }
+                    //DOWN RIGHT CAPTURE
+                    if(col < 7 && row < 7){
+                        let possibleCapture = document.getElementById(`${board[row+1][col+1]}`)
+                        if(board[row+1][col+1] !== "empty"){
+                            if(piece.classList[0] !== possibleCapture.classList[0]){
+                                pawnMove.push(`${[row+1]}${[col+1]}`)
+                            }
+                        }
+                    }
+                    possibleMoves[keyName] = pawnMove
+                }
+            }
+        }
+    }
+}
+
+//ROOK MOVE LOGIC
+function checkRookMoves() {
+//ITERATE OVER PIECES AND CHECK IF ROOK
+    for (let row = 0; row < 8; row++){
+        for (let col = 0; col < 8; col++){
+            const piece = document.getElementById(`${board[row][col]}`)
+            const keyName = board[row][col]
+            if(!!piece === true){
+                if(piece.classList.contains("rook")){
+                    let pieceMove = []
+                    upMovement(pieceMove,row,col,piece)
+                    downMovement(pieceMove,row,col,piece)
+                    leftMovement (pieceMove,row,col,piece)
+                    rightMovement (pieceMove,row,col,piece)
+                    possibleMoves[keyName] = pieceMove
+                } 
+            }
+        }
+    }
+}
+
+//BISHOP MOVE LOGIC
+function checkBishopMoves() {
+    //ITERATE OVER PIECES AND CHECK IF ROOK
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                const piece = document.getElementById(`${board[row][col]}`)
+                const keyName = board[row][col]
+                if(!!piece === true){
+                    if(piece.classList.contains("bishop")){
+                        let pieceMove = []
+                        upRightMovement(pieceMove,row,col,piece)
+                        downLeftMovement(pieceMove,row,col,piece)
+                        upLeftMovement (pieceMove,row,col,piece)
+                        downRightMovement (pieceMove,row,col,piece)
+                        possibleMoves[keyName] = pieceMove
+                    } 
+                }
+            }
+        }
+    }
+
+//QUEEN MOVE LOGIC
+function checkQueenMoves() {
+    //ITERATE OVER PIECES AND CHECK IF ROOK
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                const piece = document.getElementById(`${board[row][col]}`)
+                const keyName = board[row][col]
+                if(!!piece === true){
+                    if(piece.classList.contains("queen")){
+                        let pieceMove = []
+                        upMovement(pieceMove,row,col,piece)
+                        downMovement(pieceMove,row,col,piece)
+                        leftMovement (pieceMove,row,col,piece)
+                        rightMovement (pieceMove,row,col,piece)
+                        upRightMovement(pieceMove,row,col,piece)
+                        downLeftMovement(pieceMove,row,col,piece)
+                        upLeftMovement (pieceMove,row,col,piece)
+                        downRightMovement (pieceMove,row,col,piece)
+                        possibleMoves[keyName] = pieceMove
+                    } 
+                }
+            }
+        }
+    }
+
+
+
+//KING MOVE LOGIC
+function checkKingMoves() {
+    //ITERATE OVER PIECES AND CHECK IF ROOK
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                const piece = document.getElementById(`${board[row][col]}`)
+                const keyName = board[row][col]
+                if(!!piece === true){
+                    if(piece.classList.contains("king")){
+                        let pieceMove = []
+                        let kingsMove = []
+                        upMovement(pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        downMovement(pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        leftMovement (pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        rightMovement (pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        upRightMovement(pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        downLeftMovement(pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        upLeftMovement (pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        downRightMovement (pieceMove,row,col,piece)
+                        if(pieceMove[0] !== undefined){
+                            kingsMove.push(pieceMove[0])
+                            pieceMove = []
+                        }
+                        possibleMoves[keyName] = kingsMove
+                    } 
+                }
+            }
+        }
+    }
+
+//HORSE MOVE LOGIC
+function checkHorseMoves() {
+    //ITERATE OVER PIECES AND CHECK IF HORSE
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                const piece = document.getElementById(`${board[row][col]}`)
+                const keyName = board[row][col]
+                if(!!piece === true){
+                    if(piece.classList.contains("horse")){
+                        let horseMove = []
+                        //(2-UP)(1LEFT) **
+                        if(col > 0 && row > 1){
+                            let possibleCapture = document.getElementById(`${board[row-2][col-1]}`)
+                            if(board[row-2][col-1] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row-2]}${[col-1]}`)
+                            }
+                        }
+
+                        //(1-UP)(2LEFT) **
+                        if(col > 1 && row > 0){
+                            let possibleCapture = document.getElementById(`${board[row-1][col-2]}`)
+                            if(board[row-1][col-2] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row-1]}${[col-2]}`)
+                            }
+                        }
+
+                        //(2-UP)(1RIGHT) **
+                        if(col < 7 && row > 1){
+                            let possibleCapture = document.getElementById(`${board[row-2][col+1]}`)
+                            if(board[row-2][col+1] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row-2]}${[col+1]}`)
+                            }
+                        }
+
+                        //(1-UP)(2RIGHT) **
+                        if(col < 6 && row > 0){
+                            let possibleCapture = document.getElementById(`${board[row-1][col+2]}`)
+                            if(board[row-1][col+2] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row-1]}${[col+2]}`)
+                            }
+                        }
+
+                        //(2-DOWN)(1LEFT) **
+                        if(col > 0 && row < 6){
+                            let possibleCapture = document.getElementById(`${board[row+2][col-1]}`)
+                            if(board[row+2][col-1] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row+2]}${[col-1]}`)
+                            }
+                        }
+
+                        //(1-DOWN)(2LEFT) **
+                        if(col > 1 && row < 7){
+                            let possibleCapture = document.getElementById(`${board[row+1][col-2]}`)
+                            if(board[row+1][col-2] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row+1]}${[col-2]}`)
+                            }
+                        }
+
+                        //(2-DOWN)(1RIGHT) **
+                        if(col < 7 && row < 6){
+                            let possibleCapture = document.getElementById(`${board[row+2][col+1]}`)
+                            if(board[row+2][col+1] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row+2]}${[col+1]}`)
+                            }
+                        }
+
+                        //(1-DOWN)(2RIGHT) 
+                        if(col < 6 && row < 7){
+                            let possibleCapture = document.getElementById(`${board[row+1][col+2]}`)
+                            if(board[row+1][col+2] === "empty" || piece.classList[0] !== possibleCapture.classList[0]){
+                                horseMove.push(`${[row+1]}${[col+2]}`)
+                            }
+                        }
+
+                        possibleMoves[keyName] = horseMove
+                    
+                    } 
+                }
+            }
+        }
+    }
 
 // UPDATING THE TURN AND DISABLING MOVE FOR OTHER PLAYER
 function updateTurn(){
     if(turn === "white"){
+        document.getElementById(`playerTurnLabel`).innerHTML = `Black's Turn`
         turn = "black"
-        dropColorChecker = "black"
-        oppositeTurn = "white"
         disableWhite()
     } else if(turn === "black"){
+        document.getElementById(`playerTurnLabel`).innerHTML = `White's Turn`
         turn = "white"
-        dropColorChecker = "white"
-        oppositeTurn = "black"
         disableBlack()
     }
+}
+
+
+
+checkPieceMoves()
+disableBlack()
+
+function checkPieceMoves(){
+    checkPawnMoves()
+    checkRookMoves()
+    checkBishopMoves()
+    checkQueenMoves()
+    checkKingMoves()
+    checkHorseMoves()
+    removePieceWithNoMoves()
+}
+
+function upMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while(row>0 && pieceBlock===false){ 
+        if(board[row-1][col]==="empty"){ 
+            pieceMove.push(`${row-1}${col}`)
+        } else{
+            if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row-1][col]}`).classList[0])){
+                pieceMove.push(`${row-1}${col}`)
+            }
+                pieceBlock = true
+        }
+        row--
+    }
+        
+}
+
+function downMovement(pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while(row<7 && pieceBlock===false){ 
+                if(board[row+1][col]==="empty"){ 
+                    pieceMove.push(`${row+1}${col}`)
+                } else{
+                    if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row+1][col]}`).classList[0])){
+                        pieceMove.push(`${row+1}${col}`)
+                    }
+                    pieceBlock = true
+                }
+                row++
+            }
+}
+
+function leftMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while(col>0 && pieceBlock===false){ 
+        if(board[row][col-1]==="empty"){
+            pieceMove.push(`${row}${col-1}`)
+        } else{
+            if(piece.classList[0] !== document.getElementById(`${board[row][col-1]}`).classList[0]){
+                pieceMove.push(`${row}${col-1}`)
+            }
+            pieceBlock = true
+        }
+        col--
+    }
+}
+
+function rightMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while(col<7 && pieceBlock===false){ 
+        if(board[row][col+1]==="empty"){ 
+            pieceMove.push(`${row}${col+1}`)
+        } else{
+            if(piece.classList[0] !== document.getElementById(`${board[row][col+1]}`).classList[0]){
+                pieceMove.push(`${row}${col+1}`)
+            }
+            pieceBlock = true
+        }
+        col++
+    }
+
+}
+
+function upRightMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while((col<7 && row>0) && pieceBlock===false){ 
+            if(board[row-1][col+1]==="empty"){ 
+                pieceMove.push(`${row-1}${col+1}`)
+            } else{
+                if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row-1][col+1]}`).classList[0])){
+                    pieceMove.push(`${row-1}${col+1}`)
+                }
+                    pieceBlock = true
+            }
+            row--
+            col++
+        }
+}
+
+function upLeftMovement (pieceMove,row,col,piece){
+    let pieceBlock = false
+    while((col>0 && row>0) && pieceBlock===false){ 
+        if(board[row-1][col-1]==="empty"){ 
+            pieceMove.push(`${row-1}${col-1}`)
+        } else{
+            if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row-1][col-1]}`).classList[0])){
+                pieceMove.push(`${row-1}${col-1}`)
+            }
+                pieceBlock = true
+        }
+        row--
+        col--
+    }
+}
+
+function downRightMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while((col < 7 && row < 7) && pieceBlock===false){ 
+        if(board[row+1][col+1]==="empty"){ 
+            pieceMove.push(`${row+1}${col+1}`)
+        } else{
+            if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row+1][col+1]}`).classList[0])){
+                pieceMove.push(`${row+1}${col+1}`)
+            }
+            pieceBlock = true
+        }
+        row++
+        col++
+    }
+}
+
+function downLeftMovement (pieceMove,row,col,piece) {
+    let pieceBlock = false
+    while((col > 0 && row < 7) && pieceBlock===false){ 
+        if(board[row+1][col-1]==="empty"){ 
+            pieceMove.push(`${row+1}${col-1}`)
+        } else{
+            if(piece.classList.contains("pawn") !== true && (piece.classList[0] !== document.getElementById(`${board[row+1][col-1]}`).classList[0])){
+                pieceMove.push(`${row+1}${col-1}`)
+            }
+            pieceBlock = true
+        }
+        row++
+        col--
+    }
+}
+
+function removePieceWithNoMoves() {
+    const possibleMovesKeys = Object.keys(possibleMoves)
+    possibleMovesKeys.forEach(function (item){
+        if(possibleMoves[item][0] === undefined ){
+            delete possibleMoves[item]
+        }
+    })
 }
 
 function disableBlack(){
@@ -639,48 +844,105 @@ function disableWhite(){
     }
 }
 
-disableBlack()
+function isChecked() {
+    const possibleMovesKeys = Object.keys(possibleMoves)
+    let possibleMoveArr = []
 
-function possibleMovesGenerator() {
-    possibleMoves.forEach(function (item){
-        document.getElementById(item).classList.add("possibleMove")
+    possibleMovesKeys.forEach(function (item){
+        possibleMoves[item].forEach(function(item){
+            possibleMoveArr.push(item)
+        })
     })
-}
 
-function takenBoxClassGenerator() {
-    let boxes = document.querySelectorAll(".box")
-    boxes.forEach(function (item){
-        if (item.lastChild.classList.contains("whitepiece")){
-            item.classList.add("takenBywhite")
-            item.classList.remove("empty")
-        } else if (item.lastChild.classList.contains("blackpiece")){
-            item.classList.add("takenByblack")
-            item.classList.remove("empty")
+    possibleMoveArr.every(function (item){
+        let curRow = item[0]
+        let curCol = item[1]
+        if(board[curRow][curCol] === "kingE1" || board[curRow][curCol] === "kingE8"){
+            checked = true
+            checkedKing = board[curRow][curCol]
+            return false
+        } else {
+            checked = false
+            checkedKing = ""
+            return true
         }
     })
 }
 
-function checkPieceLocation() {
-    let pieces = document.querySelectorAll("img")
-    pieces.forEach(function (piece){
-        let currPosOfPiece = piece.parentElement.id
-        let letter = currPosOfPiece[0]
-        let number = currPosOfPiece[1]
-        let newNumber = newRowLabel.indexOf(number)
-        testBoard2[newNumber][letter] = piece.id
+function isCheckmate(){
+    const pieceWithMoves = Object.keys(possibleMoves)
+    let cancelCheckMoves = []
+
+    pieceWithMoves.forEach(function (item) {
+        let currentPiece = item
+        
+        if(turn==="white"){
+            let pieceCurrLoc
+            for(let row = 0; row < 8; row++){
+                for(let col = 0; col < 8; col++){
+                    if(item===board[row][col] && (item.includes("2") || item.includes("1"))){
+                        pieceCurrLoc = `${row}${col}`
+                        console.log(pieceCurrLoc)
+                        let movePiece = possibleMoves[item]
+                        movePiece.forEach(function (item){
+                            let moveRow = item[0]
+                            let moveCol = item[1]
+                            let removeRow = pieceCurrLoc[0]
+                            let removeCol = pieceCurrLoc[1]
+                            board[removeRow][removeCol] = "empty"
+                            board[moveRow][moveCol] = currentPiece
+                            checkPieceMoves()
+                            isChecked()
+                            posSetter()
+                            if(checked === false){
+                                cancelCheckMoves.push(`${moveRow}${moveCol}`)
+                            }
+                            checkPieceMoves()
+                        })
+                    }
+                }
+            }
+        } else if(turn==="black"){
+            let pieceCurrLoc
+            for(let row = 0; row < 8; row++){
+                for(let col = 0; col < 8; col++){
+                    if(item===board[row][col] && (item.includes("7") || item.includes("8"))){
+                        pieceCurrLoc = `${row}${col}`
+                        console.log(item+ " located at "+ pieceCurrLoc)
+                        let movePiece = possibleMoves[item]
+                        movePiece.forEach(function (item){
+                            let moveRow = item[0]
+                            let moveCol = item[1]
+                            let removeRow = pieceCurrLoc[0]
+                            let removeCol = pieceCurrLoc[1]
+
+                            if(board[moveRow][moveCol] !== "empty"){
+                                const eatenPiece = board[moveRow][moveCol]
+                                delete possibleMoves[eatenPiece]
+                            }
+
+                            board[removeRow][removeCol] = "empty"
+                            board[moveRow][moveCol] = currentPiece
+                            checkPieceMoves()
+                            isChecked()
+                            posSetter()
+                            if(checked === false){
+                                cancelCheckMoves.push(`${moveRow}${moveCol}`)
+                            }
+                            checkPieceMoves()
+                        })
+                    }
+                }
+            }
+        }
     })
+
+    checked = true //LOOK AT THIS
+    console.log(cancelCheckMoves)
+    if(cancelCheckMoves.length===0){
+        checkmate = true
+        console.log("CHECKMATE")
+    }
 }
 
-let newRowLabel = ["0","8","7","6","5","4","3","2","1",]
-
-let testBoard2 = [
-    {},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""},
-    {"A": "","B": "","C": "","D": "","E": "","F": "","G": "","H": ""}
-]
+//NOT WORKING ON DOUBLE CHECK (4 MOVE CHECKMATE)
