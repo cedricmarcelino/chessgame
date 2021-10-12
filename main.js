@@ -16,6 +16,7 @@ let possibleMoves = {}
 const win = new Audio('win.wav')
 const move = new Audio('move.wav')
 const no = new Audio('no.wav')
+let rotated=false
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -29,6 +30,14 @@ function generateBoard() {
     playerTurnLabel.setAttribute("id","playerTurnLabel")
     playerTurnLabel.innerHTML = "White's Turn"
     playerTurn.appendChild(playerTurnLabel)
+    const rotateBtn = document.createElement("span")
+    rotateBtn.setAttribute("id","rotateBtn")
+    rotateBtn.innerHTML = "⇅"
+    body.appendChild(rotateBtn)
+
+    rotateBtn.addEventListener("click", function (){
+        rotate()
+    })
 
     for(let row=0; row<8; row++){
         const rowContainer = document.createElement('div')
@@ -38,10 +47,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box empty")
-            const gridLabel = document.createElement('span')
-            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            //const gridLabel = document.createElement('span')
+            //gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
-            box.appendChild(gridLabel)
+            //box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
@@ -248,6 +257,9 @@ function resetBoard () {
 posSetter()
 
 
+
+
+
 //ASSIGNING DROP ZONES
 for (const dropZone of document.querySelectorAll(".box")) {
     dropZone.addEventListener("dragover", e => {
@@ -260,6 +272,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
     })
         dropZone.addEventListener("drop", e=>{ 
             e.preventDefault()
+            console.log(e)
             dropZone.classList.remove("drophover")
                 if((e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`))){
                 const droppedElementId = e.dataTransfer.getData("text/plain")
@@ -1008,8 +1021,25 @@ function isCheckmate(){
             disableBlack()
             document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
             resetBtnWrapper.remove()
+            if(rotated===true){
+                rotate()
+            }
         })
     }
 }
 
-//NOT WORKING ON DOUBLE CHECK (4 MOVE CHECKMATE)
+function rotate(){
+    document.getElementById("board").classList.toggle("rotate")
+    const box = document.querySelectorAll(".box")
+    box.forEach(function (item) {
+        item.classList.toggle("rotate")
+    })
+    move.currentTime = 0
+    move.play()
+
+    if (rotated === false){
+        rotated = true
+    } else {
+        rotated = false
+    }
+}

@@ -30,12 +30,23 @@ body{
     width: 80vmin;
     height: 80vmin;
     border-radius: 5px;
+    position: relative;
     overflow: hidden;
+}
+
+#rotateBtn{
+    color: #E7E7CB;
+    font-size: 3rem;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: .5rem;
 }
 
 .darkbox{
     background-color: #729153;
     color: #E7E7CB;
+    
 }
 
 .lightbox{
@@ -86,12 +97,13 @@ body{
     font-size: 2rem;
     padding: .2em;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: .2em;
     border: none;
     outline: none;
     background-color: #729153;
     color: #E7E7CB;
     box-shadow: 0 .11em #999;
+    margin-bottom: 1em;
 }
 
 #resetBtn:hover {
@@ -106,4 +118,26 @@ body{
 
 #resetBtnWrapper{
     text-align: center;
+}
+
+.rotate{
+    transform: rotate(180deg)
+}
+
+@media only screen and (max-width: 580px) {
+    html {
+        font-size: 11px;
+      }
+}
+
+@media only screen and (max-width: 452px) {
+    html {
+        font-size: 9px;
+      }
+}
+
+@media only screen and (max-width: 320px) {
+    html {
+        font-size: 6px;
+      }
 }
