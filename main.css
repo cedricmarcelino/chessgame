@@ -11,6 +11,7 @@
 
 body{
     background-color: #312E2B;
+    font-family: "familyMontserrat", sans-serif;
 }
 
 .box {
@@ -77,8 +78,32 @@ body{
 #playerTurnLabel {
     margin-top: 1rem;
     font-size: 4rem;
-    color: white;
-    font-family: "familyMontserrat", sans-serif;
+    color: #E7E7CB;
     text-align: center;
 }
 
+#resetBtn {
+    font-size: 2rem;
+    padding: .2em;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background-color: #729153;
+    color: #E7E7CB;
+    box-shadow: 0 .11em #999;
+}
+
+#resetBtn:hover {
+    background-color: #3e8e41
+}
+
+#resetBtn:active {
+    box-shadow: 0 .06em #666;
+    transform: translateY(.05em);
+}
+
+
+#resetBtnWrapper{
+    text-align: center;
+}

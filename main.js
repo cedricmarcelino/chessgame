@@ -2,7 +2,7 @@ const body = document.body
 const rowLabel = [8,7,6,5,4,3,2,1]
 rowLabel.toString()
 const columnLabel = ['A','B','C','D','E','F','G','H']
-let counter = 1;
+let counter = 1
 let turn = "white"
 let checked = false
 let dragged 
@@ -12,6 +12,10 @@ let prevCaptured = ""
 let prevCapturedContainer = ""
 let captured = false
 let checkmate = false
+let possibleMoves = {}
+const win = new Audio('win.wav')
+const move = new Audio('move.wav')
+const no = new Audio('no.wav')
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -61,13 +65,13 @@ function generateBoard() {
 generateBoard()
 
 // GENERATE CHESS PIECES
-let generatorChecker = "white";
-let row1 = ""
-let row2 = ""
-let pieceColor = ""
-
 function generatePieces(){
     
+    let generatorChecker = "white";
+    let row1 = ""
+    let row2 = ""
+    let pieceColor = ""
+
     for(let i=0; i<2; i++){
         if(generatorChecker === "white"){
             row1 = "2"
@@ -213,14 +217,11 @@ let board = [
     ["empty","empty","empty","empty","empty","empty","empty","empty",],
 ]
 
-let possibleMoves = {}
-
-
 let column = {"A": "0","B": "1","C": "2","D": "3","E": "4","F": "5","G": "6","H": "7"}
 let row = {"8": "0","7": "1","6": "2","5": "3","4": "4","3": "5","2": "6","1": "7"}
 let lastPieceMoved = ""
 
-function posSetter (){
+function posSetter(){
     resetBoard()
     const pieces = document.querySelectorAll("img")
     pieces.forEach(function (piece) {
@@ -268,11 +269,15 @@ for (const dropZone of document.querySelectorAll(".box")) {
                     legalMove(e,droppedElement,dropZone)
                     if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
                         prevBox.appendChild(dragged)
+                        no.currentTime = 0
+                        no.play()
                         posSetter()
                         checkPieceMoves()
+                        checked = false
                         updateTurn()
                     } else {
-                        
+                        move.currentTime = 0
+                        move.play()
                     }
                 } else if (checked === true) {
                     dropZone.appendChild(droppedElement)
@@ -293,17 +298,26 @@ for (const dropZone of document.querySelectorAll(".box")) {
                     isChecked()
                         if(checked === true){
                             prevBox.appendChild(dragged)
-                            prevCapturedContainer.appendChild(prevCaptured)
+                            if(captured === true){
+                                prevCapturedContainer.appendChild(prevCaptured)
+                            }
                             posSetter()
                             checkPieceMoves()
-                            console.log("Olleh")
+                            no.currentTime = 0
+                            no.play()
                         } else if (checked === false) {
                             legalMove(e,droppedElement,dropZone)
+                            move.currentTime = 0
+                            move.play()
                         }
                 }
+            } else {
+                no.currentTime = 0
+                no.play()
             }
             prevCapturedContainer = ""
             prevCaptured = ""
+            captured = false
             //RESETS POSSIBLE MOVE CLASS ON DROP
             document.querySelectorAll(".box").forEach(function (item) {
             item.classList.remove("possibleMove")
@@ -665,11 +679,17 @@ function checkHorseMoves() {
 // UPDATING THE TURN AND DISABLING MOVE FOR OTHER PLAYER
 function updateTurn(){
     if(turn === "white"){
-        document.getElementById(`playerTurnLabel`).innerHTML = `Black's Turn`
+        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn`
+        if(checked === true){
+            document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+        }
         turn = "black"
         disableWhite()
     } else if(turn === "black"){
-        document.getElementById(`playerTurnLabel`).innerHTML = `White's Turn`
+        document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
+        if(checked === true){
+            document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
+        }
         turn = "white"
         disableBlack()
     }
@@ -942,6 +962,53 @@ function isCheckmate(){
     if(cancelCheckMoves.length===0){
         checkmate = true
         console.log("CHECKMATE")
+        for (const blackpiece of document.querySelectorAll(".blackpiece")) {
+            blackpiece.setAttribute("draggable", "false")
+        }
+        for (const whitepiece of document.querySelectorAll(".whitepiece")) {
+            whitepiece.setAttribute("draggable", "false")
+        }
+        document.getElementById(`playerTurnLabel`).innerHTML = `Checkmate, `
+
+        if(turn === "black"){
+            document.getElementById(`playerTurnLabel`).append(`white wins!`)
+        } else {
+            document.getElementById(`playerTurnLabel`).append(`black wins!`)
+        }
+        win.currentTime = 0
+        win.play()
+        const resetBtnWrapper = document.createElement(`div`)
+        resetBtnWrapper.setAttribute(`id`,`resetBtnWrapper`)
+        body.appendChild(resetBtnWrapper)
+        const resetBtn = document.createElement(`button`)
+        resetBtn.setAttribute(`id`,`resetBtn`)
+        resetBtn.innerHTML = "New Game"
+        resetBtnWrapper.appendChild(resetBtn)
+
+        resetBtn.addEventListener("click", function() {
+            turn = "white"
+            checked = false
+            dragged = ""
+            prevBox = ""
+            checkedKing = ""
+            prevCaptured = ""
+            prevCapturedContainer = ""
+            captured = false
+            checkmate = false
+            checkmate = false
+            possibleMoves = {}
+            let oldPieces = document.querySelectorAll(`img`)
+            oldPieces.forEach(function (item){
+                item.remove()
+            })
+            generatePieces()
+            resetBoard ()
+            posSetter()
+            checkPieceMoves()
+            disableBlack()
+            document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
+            resetBtnWrapper.remove()
+        })
     }
 }
 
