@@ -17,6 +17,9 @@ const win = new Audio('win.wav')
 const move = new Audio('move.wav')
 const no = new Audio('no.wav')
 let rotated=false
+let promoteTo = ""
+let promoteCounter = "1"
+let heldPiece = ""
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -34,6 +37,13 @@ function generateBoard() {
     rotateBtn.setAttribute("id","rotateBtn")
     rotateBtn.innerHTML = "⇅"
     body.appendChild(rotateBtn)
+    const movementBoard = document.createElement('div')
+    movementBoard.setAttribute("id","movementBoard")
+    body.appendChild(movementBoard)
+    const moveList = document.createElement('ul')
+    moveList.setAttribute("id","moveList")
+    movementBoard.appendChild(moveList)
+    
 
     rotateBtn.addEventListener("click", function (){
         rotate()
@@ -47,10 +57,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box empty")
-            //const gridLabel = document.createElement('span')
-            //gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            const gridLabel = document.createElement('span')
+            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
-            //box.appendChild(gridLabel)
+            box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
@@ -109,6 +119,7 @@ function generatePieces(){
                 possibleMovesGenerator(piece)
                 dragged = event.target
                 prevBox = dragged.parentElement
+                heldPiece = piece.id
             })
         }
 
@@ -128,6 +139,7 @@ function generatePieces(){
                     possibleMovesGenerator(piece)
                     dragged = event.target
                     prevBox = dragged.parentElement
+                    heldPiece = piece.id
                 })
             }
         }
@@ -147,6 +159,7 @@ function generatePieces(){
                     possibleMovesGenerator(piece)
                     dragged = event.target
                     prevBox = dragged.parentElement
+                    heldPiece = piece.id
                 })
             }
         }
@@ -166,6 +179,7 @@ function generatePieces(){
                     possibleMovesGenerator(piece)
                     dragged = event.target
                     prevBox = dragged.parentElement
+                    heldPiece = piece.id
                 })
             }
         }
@@ -185,6 +199,7 @@ function generatePieces(){
                     possibleMovesGenerator(piece)
                     dragged = event.target
                     prevBox = dragged.parentElement
+                    heldPiece = piece.id
                 })
             }
         }
@@ -204,6 +219,7 @@ function generatePieces(){
                     possibleMovesGenerator(piece)
                     dragged = event.target
                     prevBox = dragged.parentElement
+                    heldPiece = piece.id
                 })
             }
         }
@@ -270,88 +286,136 @@ for (const dropZone of document.querySelectorAll(".box")) {
     dropZone.addEventListener("dragleave", e => {
         dropZone.classList.remove("drophover")
     })
-        dropZone.addEventListener("drop", e=>{ 
-            e.preventDefault()
-            console.log(e)
-            dropZone.classList.remove("drophover")
-                if((e.target.classList.contains(`possibleMove`) || e.target.parentElement.classList.contains(`possibleMove`))){
-                const droppedElementId = e.dataTransfer.getData("text/plain")
-                const droppedElement = document.getElementById(droppedElementId)
 
-                if(checked === false){
-                    legalMove(e,droppedElement,dropZone)
-                    if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
-                        prevBox.appendChild(dragged)
-                        no.currentTime = 0
-                        no.play()
-                        posSetter()
-                        checkPieceMoves()
-                        checked = false
-                        updateTurn()
-                    } else {
-                        move.currentTime = 0
-                        move.play()
-                    }
-                } else if (checked === true) {
-                    dropZone.appendChild(droppedElement)
-                    
-                    for(let i = 0 ; i < 5 ; i++){
-                        if(e.path[i].tagName == 'IMG'){
-                            prevCaptured = e.path[i]
-                            prevCapturedContainer = prevCaptured.parentElement
-                            e.path[i].remove()
-                            const eatenPice = e.path[i].id
-                            delete possibleMoves[eatenPice]
-                            captured = true
-                        }
-                    }
-        
-                    posSetter()
-                    checkPieceMoves()
-                    isChecked()
-                        if(checked === true){
+    dropZone.addEventListener("dragend",  e=> {
+        document.querySelectorAll(".box").forEach(function (item) {
+        item.classList.remove("possibleMove")
+        })
+    })
+
+    dropZone.addEventListener("drop", e=>{ 
+        e.preventDefault()
+        dropZone.classList.remove("drophover")
+            if(possibleMoves[heldPiece] !== undefined) {
+                let targetID = e.target.id
+                if(e.target.tagName == 'IMG'){
+                    targetID = e.target.parentElement.id
+                }
+                let targetRow = column[targetID[0]]
+                let targetCol = row[targetID[1]]
+                let boardLoc = targetCol+""+targetRow
+            
+                if(possibleMoves[heldPiece].includes(boardLoc)){
+                    const droppedElementId = e.dataTransfer.getData("text/plain")
+                    const droppedElement = document.getElementById(droppedElementId)
+    
+                    if(checked === false){
+                        legalMove(e,droppedElement,dropZone,boardLoc)
+                        if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
                             prevBox.appendChild(dragged)
                             if(captured === true){
                                 prevCapturedContainer.appendChild(prevCaptured)
                             }
-                            posSetter()
-                            checkPieceMoves()
                             no.currentTime = 0
                             no.play()
-                        } else if (checked === false) {
-                            legalMove(e,droppedElement,dropZone)
+                            posSetter()
+                            checkPieceMoves()
+                            checked = false
+                            updateTurn()
+                        } else {
                             move.currentTime = 0
                             move.play()
+                            if(captured === true){
+                                let moveRecord = prevBox.id + " to " + targetID + " captures " + e.target.id
+                                console.log(moveRecord)
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                            } else {
+                                let moveRecord = prevBox.id + " to " + targetID
+                                console.log(moveRecord)
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                            }
                         }
+                    } else if (checked === true) {
+                        dropZone.appendChild(droppedElement)
+                        const pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
+                        if(pieceOnPossMove !== "empty"){
+                            const capturedPiece = document.getElementById(pieceOnPossMove)
+                            prevCaptured = capturedPiece
+                            prevCapturedContainer = prevCaptured.parentElement
+                            capturedPiece.remove()
+                            delete possibleMoves[pieceOnPossMove]
+                            captured = true
+                        }
+                        posSetter()
+                        checkPieceMoves()
+                        isChecked()
+                            if(checked === true){
+                                prevBox.appendChild(dragged)
+                                if(captured === true){
+                                    prevCapturedContainer.appendChild(prevCaptured)
+                                }
+                                posSetter()
+                                checkPieceMoves()
+                                no.currentTime = 0
+                                no.play()
+                            } else if (checked === false) {
+                                prevBox.appendChild(dragged)
+                                if(captured === true){
+                                    prevCapturedContainer.appendChild(prevCaptured)
+                                }
+                                posSetter()
+                                checkPieceMoves()
+                                legalMove(e,droppedElement,dropZone,boardLoc)
+                                if(captured === true){
+                                    let moveRecord = prevBox.id + " to " + targetID + " captures " + e.target.id
+                                    console.log(moveRecord)
+                                    let newMove = document.createElement('li')
+                                    newMove.innerHTML = moveRecord
+                                    document.getElementById("moveList").appendChild(newMove)
+                                } else {
+                                    let moveRecord = prevBox.id + " to " + targetID
+                                    console.log(moveRecord)
+                                    let newMove = document.createElement('li')
+                                    newMove.innerHTML = moveRecord
+                                    document.getElementById("moveList").appendChild(newMove)
+                                }
+                                move.currentTime = 0
+                                move.play()
+                            }
+                    }
+                } else {
+                    no.currentTime = 0
+                    no.play()
                 }
             } else {
                 no.currentTime = 0
                 no.play()
             }
-            prevCapturedContainer = ""
-            prevCaptured = ""
-            captured = false
-            //RESETS POSSIBLE MOVE CLASS ON DROP
-            document.querySelectorAll(".box").forEach(function (item) {
-            item.classList.remove("possibleMove")
-            })
+        prevCapturedContainer = ""
+        prevCaptured = ""
+        captured = false
+        //RESETS POSSIBLE MOVE CLASS ON DROP
+        document.querySelectorAll(".box").forEach(function (item) {
+        item.classList.remove("possibleMove")
         })
+    })
 }
 
-function legalMove (e,droppedElement,dropZone){
-    //FOR EATEN PIECES
-        //ITERATE ON E.PATH TO CHECK FOR DIV OF THE CAPTURED ELEMENT
+function legalMove (e,droppedElement,dropZone,boardLoc){
         dropZone.appendChild(droppedElement)
-            for(let i = 0 ; i < 5 ; i++){
-                if(e.path[i].tagName == 'IMG'){
-                    prevCaptured = e.path[i]
-                    prevCapturedContainer = prevCaptured.parentElement
-                    e.path[i].remove()
-                    const eatenPice = e.path[i].id
-                    delete possibleMoves[eatenPice]
-                    captured = true
-                }
-            }
+        const pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
+        if(pieceOnPossMove !== "empty"){
+            const capturedPiece = document.getElementById(pieceOnPossMove)
+            prevCaptured = capturedPiece
+            prevCapturedContainer = prevCaptured.parentElement
+            capturedPiece.remove()
+            delete possibleMoves[pieceOnPossMove]
+            captured = true
+        }
         droppedElement.classList.remove("firstmove")
         posSetter()
         checkPieceMoves()
@@ -915,7 +979,6 @@ function isCheckmate(){
                 for(let col = 0; col < 8; col++){
                     if(item===board[row][col] && (item.includes("2") || item.includes("1"))){
                         pieceCurrLoc = `${row}${col}`
-                        console.log(pieceCurrLoc)
                         let movePiece = possibleMoves[item]
                         movePiece.forEach(function (item){
                             let moveRow = item[0]
@@ -941,7 +1004,6 @@ function isCheckmate(){
                 for(let col = 0; col < 8; col++){
                     if(item===board[row][col] && (item.includes("7") || item.includes("8"))){
                         pieceCurrLoc = `${row}${col}`
-                        console.log(item+ " located at "+ pieceCurrLoc)
                         let movePiece = possibleMoves[item]
                         movePiece.forEach(function (item){
                             let moveRow = item[0]
@@ -971,10 +1033,8 @@ function isCheckmate(){
     })
 
     checked = true //LOOK AT THIS
-    console.log(cancelCheckMoves)
     if(cancelCheckMoves.length===0){
         checkmate = true
-        console.log("CHECKMATE")
         for (const blackpiece of document.querySelectorAll(".blackpiece")) {
             blackpiece.setAttribute("draggable", "false")
         }
@@ -1020,6 +1080,7 @@ function isCheckmate(){
             checkPieceMoves()
             disableBlack()
             document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
+            document.getElementById(`moveList`).innerHTML = ``
             resetBtnWrapper.remove()
             if(rotated===true){
                 rotate()
@@ -1042,4 +1103,46 @@ function rotate(){
     } else {
         rotated = false
     }
+}
+
+function pawnPromotion (promoteTo){
+    let pieceToChange = ""
+    let pieceToChangeLoc = ""
+    let pieceColor
+    let pieceColorId
+    board[0].forEach(function (item){
+        if(item.includes("pawn") && item.includes("2")){
+            pieceColor = "w"
+            pieceColorId = "white"
+        } else if (item.includes("pawn") && item.includes("7")){
+            pieceColor = "b"
+            pieceColorId = "black"
+        }
+            //DISPLAY CHOICE OF PIECE ON WEBPAGE
+        pieceToChange = item
+        pieceToChangeLoc = board[0].indexOf(item)
+        pieceToChangeLoc = pieceToChangeLoc.toString()
+        let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
+        document.getElementById(pieceToChange).remove()
+        switch(promoteTo){
+            case "queen":
+                const piece = document.createElement('img')
+                const box = document.getElementById(`${pieceToChangeCol}8`)
+                piece.setAttribute("src",`chesspiece/${pieceColorClass}queen.png`)
+                piece.setAttribute("class",`whitepiece queen`)
+                piece.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                box.appendChild(piece)
+
+                piece.addEventListener("dragstart", e => {
+                    e.dataTransfer.setData("text/plain", piece.id)
+                    possibleMovesGenerator(piece)
+                    dragged = event.target
+                    prevBox = dragged.parentElement
+                    posSetter()
+                    checkPieceMoves()
+                })
+                promoteCounter++
+                break;
+        }
+    })
 }

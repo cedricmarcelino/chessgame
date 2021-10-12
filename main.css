@@ -41,6 +41,7 @@ body{
     position: absolute;
     top: 0;
     left: .5rem;
+    display: none;
 }
 
 .darkbox{
@@ -124,6 +125,12 @@ body{
     transform: rotate(180deg)
 }
 
+#moveList {
+    text-align: center;
+    color: #E7E7CB;
+    font-size: 1.5rem;
+}
+
 @media only screen and (max-width: 580px) {
     html {
         font-size: 11px;
@@ -140,4 +147,12 @@ body{
     html {
         font-size: 6px;
       }
+}
+
+@media only screen and (min-width: 1222px) {
+    #moveList{
+        position:absolute;
+        top: 2rem;
+        left: 2rem;
+    }
 }
