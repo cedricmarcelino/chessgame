@@ -343,6 +343,9 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 document.getElementById("moveList").appendChild(newMove)
                             }
                             pawnPromotionChecker()
+                            if(checked === true){
+                                isCheckmate()
+                            }
                         }
                     } else if (checked === true) {
                         dropZone.appendChild(droppedElement)
@@ -391,6 +394,9 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 move.currentTime = 0
                                 move.play()
                                 pawnPromotionChecker()
+                                if(checked === true){
+                                    isCheckmate()
+                                }
                             }
                     }
                 } else {
@@ -429,9 +435,6 @@ function legalMove (e,droppedElement,dropZone,boardLoc){
         checkPieceMoves()
         isChecked()
         updateTurn()
-        if(checked === true){
-            isCheckmate()
-        }
 }
 
 //ITERATE THROUGH POSSIBLE MOVES
@@ -1193,6 +1196,9 @@ function pawnPromotion(promoteTo){
             pieceToChangeLoc = pieceToChangeLoc.toString()
             let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
             document.getElementById(pieceToChange).remove()
+            let moveRecord
+            let newMove
+
             switch(promoteTo){
                 case "queen":
                     const newQueen = document.createElement('img')
@@ -1205,6 +1211,12 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
+
+                    moveRecord = `Promoted ${pieceToChange} to Queen`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
+                    
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
@@ -1236,6 +1248,11 @@ function pawnPromotion(promoteTo){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
 
+                    moveRecord = `Promoted ${pieceToChange} to Bishop`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
+
                     newBishop.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newBishop.id)
                         possibleMovesGenerator(newBishop)
@@ -1262,6 +1279,11 @@ function pawnPromotion(promoteTo){
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
+
+                    moveRecord = `Promoted ${pieceToChange} to Rook`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
 
                     newRook.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newRook.id)
@@ -1290,6 +1312,11 @@ function pawnPromotion(promoteTo){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
 
+                    moveRecord = `Promoted ${pieceToChange} to Horse`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
+
                     newHorse.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newHorse.id)
                         possibleMovesGenerator(newHorse)
@@ -1313,6 +1340,9 @@ function pawnPromotion(promoteTo){
             pieceToChangeLoc = pieceToChangeLoc.toString()
             let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
             document.getElementById(pieceToChange).remove()
+            let moveRecord
+            let newMove
+
             switch(promoteTo){
                 case "queen":
                     const newQueen = document.createElement('img')
@@ -1328,6 +1358,11 @@ function pawnPromotion(promoteTo){
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
+
+                    moveRecord = `Promoted ${pieceToChange} to Queen`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
 
                     newQueen.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newQueen.id)
@@ -1355,6 +1390,11 @@ function pawnPromotion(promoteTo){
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
+                    
+                    moveRecord = `Promoted ${pieceToChange} to Bishop`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
 
                     newBishop.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newBishop.id)
@@ -1382,6 +1422,12 @@ function pawnPromotion(promoteTo){
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
+
+                    moveRecord = `Promoted ${pieceToChange} to Rook`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
+
                     newRook.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newRook.id)
                         possibleMovesGenerator(newRook)
@@ -1405,9 +1451,15 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
+
                     if(checked===true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
+
+                    moveRecord = `Promoted ${pieceToChange} to Horse`
+                    newMove = document.createElement('li')
+                    newMove.innerHTML = moveRecord
+                    document.getElementById("moveList").appendChild(newMove)
 
                     newHorse.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newHorse.id)
