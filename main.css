@@ -131,6 +131,52 @@ body{
     font-size: 1.5rem;
 }
 
+#promotionBannerWrapper{
+    position: absolute;
+    background-color: rgb(5, 0, 0, 0.6);
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+}
+
+#promotionBanner {
+    width: 80vw;
+    background-color: #729153;
+    color: #E7E7CB;
+    margin:auto;
+    margin-top: 10em;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: .5em;
+    overflow: hidden;
+    padding-bottom: 1em;
+}
+
+#bishopBtn, #queenBtn, #rookBtn, #horseBtn {
+    color: #729153;
+    background-color: #E7E7CB;
+    font-size: 2rem;
+    margin-top: .5em;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    box-shadow: 0 .11em #999;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#bishopBtn:hover,#queenBtn:hover,#rookBtn:hover,#horseBtn:hover {
+    background-color: #dadaa9
+}
+
+#bishopBtn:active,#queenBtn:active,#rookBtn:active,#horseBtn:active {
+    box-shadow: 0 .06em #666;
+    transform: translateY(.05em);
+}
+
 @media only screen and (max-width: 580px) {
     html {
         font-size: 11px;
@@ -154,5 +200,11 @@ body{
         position:absolute;
         top: 2rem;
         left: 2rem;
+    }
+
+    #promotionBanner {
+        width: 40vw;
+        padding-top: 1em;
+        padding-bottom: 2em;
     }
 }

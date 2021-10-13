@@ -20,6 +20,8 @@ let rotated=false
 let promoteTo = ""
 let promoteCounter = "1"
 let heldPiece = ""
+let piecePossibleMoves = []
+let pieceOnPossMove = ""
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -120,6 +122,8 @@ function generatePieces(){
                 dragged = event.target
                 prevBox = dragged.parentElement
                 heldPiece = piece.id
+                piecePossibleMoves = possibleMoves[heldPiece]
+                console.log(piecePossibleMoves)
             })
         }
 
@@ -326,7 +330,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
                             move.currentTime = 0
                             move.play()
                             if(captured === true){
-                                let moveRecord = prevBox.id + " to " + targetID + " captures " + e.target.id
+                                let moveRecord = prevBox.id + " to " + targetID + " captures " + pieceOnPossMove
                                 console.log(moveRecord)
                                 let newMove = document.createElement('li')
                                 newMove.innerHTML = moveRecord
@@ -338,6 +342,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 newMove.innerHTML = moveRecord
                                 document.getElementById("moveList").appendChild(newMove)
                             }
+                            pawnPromotionChecker()
                         }
                     } else if (checked === true) {
                         dropZone.appendChild(droppedElement)
@@ -371,7 +376,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 checkPieceMoves()
                                 legalMove(e,droppedElement,dropZone,boardLoc)
                                 if(captured === true){
-                                    let moveRecord = prevBox.id + " to " + targetID + " captures " + e.target.id
+                                    let moveRecord = prevBox.id + " to " + targetID + " captures " + pieceOnPossMove
                                     console.log(moveRecord)
                                     let newMove = document.createElement('li')
                                     newMove.innerHTML = moveRecord
@@ -385,6 +390,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 }
                                 move.currentTime = 0
                                 move.play()
+                                pawnPromotionChecker()
                             }
                     }
                 } else {
@@ -397,7 +403,9 @@ for (const dropZone of document.querySelectorAll(".box")) {
             }
         prevCapturedContainer = ""
         prevCaptured = ""
+        console.log(pieceOnPossMove)
         captured = false
+        pieceOnPossMove = ""
         //RESETS POSSIBLE MOVE CLASS ON DROP
         document.querySelectorAll(".box").forEach(function (item) {
         item.classList.remove("possibleMove")
@@ -407,7 +415,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
 
 function legalMove (e,droppedElement,dropZone,boardLoc){
         dropZone.appendChild(droppedElement)
-        const pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
+        pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
         if(pieceOnPossMove !== "empty"){
             const capturedPiece = document.getElementById(pieceOnPossMove)
             prevCaptured = capturedPiece
@@ -985,6 +993,12 @@ function isCheckmate(){
                             let moveCol = item[1]
                             let removeRow = pieceCurrLoc[0]
                             let removeCol = pieceCurrLoc[1]
+    
+                            if(board[moveRow][moveCol] !== "empty"){
+                                const eatenPiece = board[moveRow][moveCol]
+                                delete possibleMoves[eatenPiece]
+                            }
+
                             board[removeRow][removeCol] = "empty"
                             board[moveRow][moveCol] = currentPiece
                             checkPieceMoves()
@@ -1105,44 +1119,261 @@ function rotate(){
     }
 }
 
-function pawnPromotion (promoteTo){
-    let pieceToChange = ""
-    let pieceToChangeLoc = ""
-    let pieceColor
-    let pieceColorId
+function pawnPromotionChecker(){
     board[0].forEach(function (item){
         if(item.includes("pawn") && item.includes("2")){
-            pieceColor = "w"
-            pieceColorId = "white"
-        } else if (item.includes("pawn") && item.includes("7")){
-            pieceColor = "b"
-            pieceColorId = "black"
+            pawnPromotionbanner()
         }
-            //DISPLAY CHOICE OF PIECE ON WEBPAGE
-        pieceToChange = item
-        pieceToChangeLoc = board[0].indexOf(item)
-        pieceToChangeLoc = pieceToChangeLoc.toString()
-        let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
-        document.getElementById(pieceToChange).remove()
-        switch(promoteTo){
-            case "queen":
-                const piece = document.createElement('img')
-                const box = document.getElementById(`${pieceToChangeCol}8`)
-                piece.setAttribute("src",`chesspiece/${pieceColorClass}queen.png`)
-                piece.setAttribute("class",`whitepiece queen`)
-                piece.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
-                box.appendChild(piece)
+    })
+    board[7].forEach(function (item){
+        if(item.includes("pawn") && item.includes("7")){
+            pawnPromotionbanner()
+        }
+    })
+}
 
-                piece.addEventListener("dragstart", e => {
-                    e.dataTransfer.setData("text/plain", piece.id)
-                    possibleMovesGenerator(piece)
-                    dragged = event.target
-                    prevBox = dragged.parentElement
-                    posSetter()
-                    checkPieceMoves()
-                })
-                promoteCounter++
-                break;
+function pawnPromotionbanner() {
+    const promotionBannerWrapper = document.createElement(`div`)
+    promotionBannerWrapper.setAttribute("id",`promotionBannerWrapper`)
+    body.appendChild(promotionBannerWrapper)
+    const promotionBanner = document.createElement(`div`)
+    promotionBanner.setAttribute("id",`promotionBanner`)
+    promotionBannerWrapper.appendChild(promotionBanner)
+    const promotionBannerHeader = document.createElement(`h1`)
+    promotionBannerHeader.setAttribute("id",`promotionBannerHeader`)
+    promotionBannerHeader.innerHTML = "Pawn Promotion"
+    promotionBanner.appendChild(promotionBannerHeader)
+
+    const queenBtn = document.createElement(`button`)
+    queenBtn.setAttribute("id",`queenBtn`)
+    queenBtn.innerHTML = "Queen"
+    promotionBanner.appendChild(queenBtn)
+    queenBtn.addEventListener("click", function(){
+        pawnPromotion("queen")
+        promotionBannerWrapper.remove()
+    })
+
+    const rookBtn = document.createElement(`button`)
+    rookBtn.setAttribute("id",`rookBtn`)
+    rookBtn.innerHTML = "Rook"
+    promotionBanner.appendChild(rookBtn)
+    rookBtn.addEventListener("click", function(){
+        pawnPromotion("rook")
+        promotionBannerWrapper.remove()
+    })
+
+    const horseBtn = document.createElement(`button`)
+    horseBtn.setAttribute("id",`horseBtn`)
+    horseBtn.innerHTML = "Knight"
+    promotionBanner.appendChild(horseBtn)
+    horseBtn.addEventListener("click", function(){
+        pawnPromotion("horse")
+        promotionBannerWrapper.remove()
+    })
+
+    const bishopBtn = document.createElement(`button`)
+    bishopBtn.setAttribute("id",`bishopBtn`)
+    bishopBtn.innerHTML = "Bishop"
+    promotionBanner.appendChild(bishopBtn)
+    bishopBtn.addEventListener("click", function(){
+        pawnPromotion("bishop")
+        promotionBannerWrapper.remove()
+    })
+}
+
+function pawnPromotion(promoteTo){
+    let pieceToChange = ""
+    let pieceToChangeLoc = ""
+
+    board[0].forEach(function (item){
+        if(item.includes("pawn") && item.includes("2")){
+            //DISPLAY CHOICE OF PIECE ON WEBPAGE
+            pieceToChange = item
+            pieceToChangeLoc = board[0].indexOf(item)
+            pieceToChangeLoc = pieceToChangeLoc.toString()
+            let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
+            document.getElementById(pieceToChange).remove()
+            switch(promoteTo){
+                case "queen":
+                    const newQueen = document.createElement('img')
+                    const locOfNewQ = document.getElementById(`${pieceToChangeCol}8`)
+                    newQueen.setAttribute("src",`chesspiece/wqueen.png`)
+                    newQueen.setAttribute("class",`whitepiece queen`)
+                    newQueen.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewQ.appendChild(newQueen)
+                    disableWhite()
+
+                    newQueen.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newQueen.id)
+                        possibleMovesGenerator(newQueen)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newQueen.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "bishop":
+                    const newBishop = document.createElement('img')
+                    const locOfNewB = document.getElementById(`${pieceToChangeCol}8`)
+                    newBishop.setAttribute("src",`chesspiece/wbishop.png`)
+                    newBishop.setAttribute("class",`whitepiece bishop`)
+                    newBishop.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewB.appendChild(newBishop)
+                    disableWhite()
+
+                    newBishop.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newBishop.id)
+                        possibleMovesGenerator(newBishop)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newBishop.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "rook":
+                    const newRook = document.createElement('img')
+                    const locOfNewR = document.getElementById(`${pieceToChangeCol}8`)
+                    newRook.setAttribute("src",`chesspiece/wrook.png`)
+                    newRook.setAttribute("class",`whitepiece rook`)
+                    newRook.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewR.appendChild(newRook)
+                    disableWhite()
+
+                    newRook.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newRook.id)
+                        possibleMovesGenerator(newRook)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newRook.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "horse":
+                    const newHorse = document.createElement('img')
+                    const locOfNewH = document.getElementById(`${pieceToChangeCol}8`)
+                    newHorse.setAttribute("src",`chesspiece/whorse.png`)
+                    newHorse.setAttribute("class",`whitepiece horse`)
+                    newHorse.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewH.appendChild(newHorse)
+                    disableWhite()
+
+                    newHorse.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newHorse.id)
+                        possibleMovesGenerator(newHorse)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newHorse.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+            }
+        }
+    })
+
+    board[7].forEach(function (item){
+        if(item.includes("pawn") && item.includes("7")){
+            //DISPLAY CHOICE OF PIECE ON WEBPAGE
+            pieceToChange = item
+            pieceToChangeLoc = board[7].indexOf(item)
+            pieceToChangeLoc = pieceToChangeLoc.toString()
+            let pieceToChangeCol = getKeyByValue(column, pieceToChangeLoc)
+            document.getElementById(pieceToChange).remove()
+            switch(promoteTo){
+                case "queen":
+                    const newQueen = document.createElement('img')
+                    const locOfNewQ = document.getElementById(`${pieceToChangeCol}1`)
+                    newQueen.setAttribute("src",`chesspiece/bqueen.png`)
+                    newQueen.setAttribute("class",`blackpiece queen`)
+                    newQueen.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewQ.appendChild(newQueen)
+                    disableBlack()
+
+                    newQueen.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newQueen.id)
+                        possibleMovesGenerator(newQueen)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newQueen.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "bishop":
+                    const newBishop = document.createElement('img')
+                    const locOfNewB = document.getElementById(`${pieceToChangeCol}1`)
+                    newBishop.setAttribute("src",`chesspiece/bbishop.png`)
+                    newBishop.setAttribute("class",`blackpiece bishop`)
+                    newBishop.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewB.appendChild(newBishop)
+                    disableBlack()
+
+                    newBishop.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newBishop.id)
+                        possibleMovesGenerator(newBishop)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newBishop.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "rook":
+                    const newRook = document.createElement('img')
+                    const locOfNewR = document.getElementById(`${pieceToChangeCol}1`)
+                    newRook.setAttribute("src",`chesspiece/brook.png`)
+                    newRook.setAttribute("class",`blackpiece rook`)
+                    newRook.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewR.appendChild(newRook)
+                    disableBlack()
+
+                    newRook.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newRook.id)
+                        possibleMovesGenerator(newRook)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newRook.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+                
+                case "horse":
+                    const newHorse = document.createElement('img')
+                    const locOfNewH = document.getElementById(`${pieceToChangeCol}1`)
+                    newHorse.setAttribute("src",`chesspiece/bhorse.png`)
+                    newHorse.setAttribute("class",`blackpiece horse`)
+                    newHorse.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
+                    locOfNewH.appendChild(newHorse)
+                    disableBlack()
+
+                    newHorse.addEventListener("dragstart", e => {
+                        e.dataTransfer.setData("text/plain", newHorse.id)
+                        possibleMovesGenerator(newHorse)
+                        dragged = event.target
+                        prevBox = dragged.parentElement
+                        heldPiece = newHorse.id
+                        posSetter()
+                        checkPieceMoves()
+                    })
+                    promoteCounter++
+                    break;
+            }
         }
     })
 }
