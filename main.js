@@ -4,10 +4,11 @@ rowLabel.toString()
 const columnLabel = ['A','B','C','D','E','F','G','H']
 let counter = 1
 let turn = "white"
-let checked = false
+let whiteIsChecked = false
+let blackIsChecked = false
 let dragged 
 let prevBox
-let checkedKing
+let checkedKing = ""
 let prevCaptured = ""
 let prevCapturedContainer = ""
 let captured = false
@@ -123,7 +124,6 @@ function generatePieces(){
                 prevBox = dragged.parentElement
                 heldPiece = piece.id
                 piecePossibleMoves = possibleMoves[heldPiece]
-                console.log(piecePossibleMoves)
             })
         }
 
@@ -135,6 +135,7 @@ function generatePieces(){
                 const piece = document.createElement('img')
                 piece.setAttribute("src",`chesspiece/${pieceColor}rook.png`)
                 piece.setAttribute("class",`${pieceColorClass}piece rook`)
+                piece.setAttribute("class",`${pieceColorClass}piece rook firstmove`)
                 piece.setAttribute("id",`rook${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
 
@@ -175,6 +176,7 @@ function generatePieces(){
                 const piece = document.createElement('img')
                 piece.setAttribute("src",`chesspiece/${pieceColor}king.png`)
                 piece.setAttribute("class",`${pieceColorClass}piece king`)
+                piece.setAttribute("class",`${pieceColorClass}piece king firstmove`)
                 piece.setAttribute("id",`king${columnLabel[i]}${row2}`)
                 box.appendChild(piece)
 
@@ -298,144 +300,156 @@ for (const dropZone of document.querySelectorAll(".box")) {
     })
 
     dropZone.addEventListener("drop", e=>{ 
-        e.preventDefault()
+        const droppedElementId = e.dataTransfer.getData("text/plain")
+        const droppedElement = document.getElementById(droppedElementId)
         dropZone.classList.remove("drophover")
-            if(possibleMoves[heldPiece] !== undefined) {
-                let targetID = e.target.id
+        if(possibleMoves[heldPiece] !== undefined) {
+            let targetID = e.target.id
                 if(e.target.tagName == 'IMG'){
                     targetID = e.target.parentElement.id
                 }
                 let targetRow = column[targetID[0]]
                 let targetCol = row[targetID[1]]
                 let boardLoc = targetCol+""+targetRow
-            
                 if(possibleMoves[heldPiece].includes(boardLoc)){
                     const droppedElementId = e.dataTransfer.getData("text/plain")
                     const droppedElement = document.getElementById(droppedElementId)
-    
-                    if(checked === false){
-                        legalMove(e,droppedElement,dropZone,boardLoc)
-                        if((checked === true && turn === "white" && checkedKing === "kingE8") || (checked === true && turn === "black" && checkedKing === "kingE1")){
-                            prevBox.appendChild(dragged)
-                            if(captured === true){
-                                prevCapturedContainer.appendChild(prevCaptured)
-                            }
-                            no.currentTime = 0
-                            no.play()
+                    if(blackIsChecked === false && whiteIsChecked === false){
+                        if(board[boardLoc[0]][boardLoc[1]] === "empty"){
+                            board[boardLoc[0]][boardLoc[1]] = heldPiece
+                            dropZone.appendChild(droppedElement)
                             posSetter()
                             checkPieceMoves()
-                            checked = false
-                            updateTurn()
-                        } else {
-                            move.currentTime = 0
-                            move.play()
-                            if(captured === true){
-                                let moveRecord = prevBox.id + " to " + targetID + " captures " + pieceOnPossMove
-                                console.log(moveRecord)
-                                let newMove = document.createElement('li')
-                                newMove.innerHTML = moveRecord
-                                document.getElementById("moveList").appendChild(newMove)
-                            } else {
-                                let moveRecord = prevBox.id + " to " + targetID
-                                console.log(moveRecord)
-                                let newMove = document.createElement('li')
-                                newMove.innerHTML = moveRecord
-                                document.getElementById("moveList").appendChild(newMove)
-                            }
-                            pawnPromotionChecker()
-                            if(checked === true){
-                                isCheckmate()
-                            }
-                        }
-                    } else if (checked === true) {
-                        dropZone.appendChild(droppedElement)
-                        const pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
-                        if(pieceOnPossMove !== "empty"){
-                            const capturedPiece = document.getElementById(pieceOnPossMove)
-                            prevCaptured = capturedPiece
-                            prevCapturedContainer = prevCaptured.parentElement
-                            capturedPiece.remove()
-                            delete possibleMoves[pieceOnPossMove]
-                            captured = true
-                        }
-                        posSetter()
-                        checkPieceMoves()
-                        isChecked()
-                            if(checked === true){
-                                prevBox.appendChild(dragged)
-                                if(captured === true){
-                                    prevCapturedContainer.appendChild(prevCaptured)
-                                }
-                                posSetter()
-                                checkPieceMoves()
-                                no.currentTime = 0
-                                no.play()
-                            } else if (checked === false) {
-                                prevBox.appendChild(dragged)
-                                if(captured === true){
-                                    prevCapturedContainer.appendChild(prevCaptured)
-                                }
-                                posSetter()
-                                checkPieceMoves()
-                                legalMove(e,droppedElement,dropZone,boardLoc)
-                                if(captured === true){
-                                    let moveRecord = prevBox.id + " to " + targetID + " captures " + pieceOnPossMove
-                                    console.log(moveRecord)
-                                    let newMove = document.createElement('li')
-                                    newMove.innerHTML = moveRecord
-                                    document.getElementById("moveList").appendChild(newMove)
-                                } else {
-                                    let moveRecord = prevBox.id + " to " + targetID
-                                    console.log(moveRecord)
-                                    let newMove = document.createElement('li')
-                                    newMove.innerHTML = moveRecord
-                                    document.getElementById("moveList").appendChild(newMove)
-                                }
+                            isChecked()
+                            if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
                                 move.currentTime = 0
                                 move.play()
                                 pawnPromotionChecker()
-                                if(checked === true){
-                                    isCheckmate()
-                                }
+                                updateTurn()
+                                let moveRecord = prevBox.id + " to " + targetID
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                                isCheckmate()
+                                droppedElement.classList.remove("firstmove")
+                            } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
+                                prevBox.appendChild(dragged)
+                                posSetter()
+                                checkPieceMoves()
+                                isChecked()
+                                no.currentTime = 0
+                                no.play()
                             }
+                        } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
+                            const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
+                            board[boardLoc[0]][boardLoc[1]] = heldPiece
+                            delete possibleMoves[pieceToCapture]
+                            const pieceToCaptureDOM = document.getElementById(pieceToCapture)
+                            pieceToCaptureDOM.remove()
+                            dropZone.appendChild(droppedElement)
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
+                                move.currentTime = 0
+                                move.play()
+                                pawnPromotionChecker()
+                                updateTurn()
+                                let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                                isCheckmate()
+                                droppedElement.classList.remove("firstmove")
+                            } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
+                                prevBox.appendChild(dragged)
+                                dropZone.appendChild(pieceToCaptureDOM)
+                                board[boardLoc[0]][boardLoc[1]] = pieceToCapture
+                                posSetter()
+                                checkPieceMoves()
+                                isChecked()
+                                no.currentTime = 0
+                                no.play()
+                            }
+                        }
+                    } else if (whiteIsChecked === true || blackIsChecked === true) {
+                        if(board[boardLoc[0]][boardLoc[1]] === "empty"){
+                            board[boardLoc[0]][boardLoc[1]] = heldPiece
+                            dropZone.appendChild(droppedElement)
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false)){
+                                move.currentTime = 0
+                                move.play()
+                                pawnPromotionChecker()
+                                updateTurn()
+                                let moveRecord = prevBox.id + " to " + targetID
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                                isCheckmate()
+                                droppedElement.classList.remove("firstmove")
+                            } else{
+                                prevBox.appendChild(dragged)
+                                posSetter()
+                                checkPieceMoves()
+                                isChecked()
+                                no.currentTime = 0
+                                no.play()
+                            }
+                        } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
+                            const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
+                            board[boardLoc[0]][boardLoc[1]] = heldPiece
+                            delete possibleMoves[pieceToCapture]
+                            const pieceToCaptureDOM = document.getElementById(pieceToCapture)
+                            pieceToCaptureDOM.remove()
+                            dropZone.appendChild(droppedElement)
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false) ){
+                                move.currentTime = 0
+                                move.play()
+                                pawnPromotionChecker()
+                                updateTurn()
+                                let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
+                                let newMove = document.createElement('li')
+                                newMove.innerHTML = moveRecord
+                                document.getElementById("moveList").appendChild(newMove)
+                                isCheckmate()
+                                droppedElement.classList.remove("firstmove")
+                            } else{
+                                prevBox.appendChild(dragged)
+                                dropZone.appendChild(pieceToCaptureDOM)
+                                board[boardLoc[0]][boardLoc[1]] = pieceToCapture
+                                posSetter()
+                                checkPieceMoves()
+                                isChecked()
+                                no.currentTime = 0
+                                no.play()
+                            }
+                        }
                     }
-                } else {
+                }else {
                     no.currentTime = 0
                     no.play()
                 }
-            } else {
-                no.currentTime = 0
-                no.play()
-            }
+        } else {
+            no.currentTime = 0
+            no.play()
+        }
+
         prevCapturedContainer = ""
         prevCaptured = ""
-        console.log(pieceOnPossMove)
         captured = false
         pieceOnPossMove = ""
-        //RESETS POSSIBLE MOVE CLASS ON DROP
         document.querySelectorAll(".box").forEach(function (item) {
-        item.classList.remove("possibleMove")
+            item.classList.remove("possibleMove")
         })
     })
 }
 
-function legalMove (e,droppedElement,dropZone,boardLoc){
-        dropZone.appendChild(droppedElement)
-        pieceOnPossMove = board[boardLoc[0]][boardLoc[1]]
-        if(pieceOnPossMove !== "empty"){
-            const capturedPiece = document.getElementById(pieceOnPossMove)
-            prevCaptured = capturedPiece
-            prevCapturedContainer = prevCaptured.parentElement
-            capturedPiece.remove()
-            delete possibleMoves[pieceOnPossMove]
-            captured = true
-        }
-        droppedElement.classList.remove("firstmove")
-        posSetter()
-        checkPieceMoves()
-        isChecked()
-        updateTurn()
-}
 
 //ITERATE THROUGH POSSIBLE MOVES
 function possibleMovesGenerator(piece){
@@ -506,6 +520,7 @@ function checkPawnMoves() {
                             }
                         }
                     }
+
                     possibleMoves[keyName] = pawnMove
                 } else if (piece.classList.contains("blackpiece") && piece.classList.contains("pawn")) {
                     let pieceMove = []
@@ -548,6 +563,8 @@ function checkPawnMoves() {
                             }
                         }
                     }
+
+                    
                     possibleMoves[keyName] = pawnMove
                 }
             }
@@ -675,6 +692,7 @@ function checkKingMoves() {
                             kingsMove.push(pieceMove[0])
                             pieceMove = []
                         }
+                        
                         possibleMoves[keyName] = kingsMove
                     } 
                 }
@@ -768,14 +786,14 @@ function checkHorseMoves() {
 function updateTurn(){
     if(turn === "white"){
         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn`
-        if(checked === true){
+        if(blackIsChecked === true){
             document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
         }
         turn = "black"
         disableWhite()
     } else if(turn === "black"){
         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
-        if(checked === true){
+        if(whiteIsChecked === true){
             document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
         }
         turn = "white"
@@ -955,6 +973,7 @@ function disableWhite(){
 function isChecked() {
     const possibleMovesKeys = Object.keys(possibleMoves)
     let possibleMoveArr = []
+    let piecesOnPossMove = []
 
     possibleMovesKeys.forEach(function (item){
         possibleMoves[item].forEach(function(item){
@@ -962,19 +981,24 @@ function isChecked() {
         })
     })
 
-    possibleMoveArr.every(function (item){
+    possibleMoveArr.forEach(function (item){
         let curRow = item[0]
         let curCol = item[1]
-        if(board[curRow][curCol] === "kingE1" || board[curRow][curCol] === "kingE8"){
-            checked = true
-            checkedKing = board[curRow][curCol]
-            return false
-        } else {
-            checked = false
-            checkedKing = ""
-            return true
-        }
+        piecesOnPossMove.push(board[curRow][curCol])
     })
+
+    if(piecesOnPossMove.includes("kingE1") === true){
+        whiteIsChecked = true
+    }else if (piecesOnPossMove.includes("kingE1") === false){
+        whiteIsChecked = false
+    }
+
+    if(piecesOnPossMove.includes("kingE8") === true){
+        blackIsChecked = true
+    }else if (piecesOnPossMove.includes("kingE8") === false){
+        blackIsChecked = false
+    }
+    
 }
 
 function isCheckmate(){
@@ -1007,7 +1031,7 @@ function isCheckmate(){
                             checkPieceMoves()
                             isChecked()
                             posSetter()
-                            if(checked === false){
+                            if(whiteIsChecked === false){
                                 cancelCheckMoves.push(`${moveRow}${moveCol}`)
                             }
                             checkPieceMoves()
@@ -1038,7 +1062,7 @@ function isCheckmate(){
                             checkPieceMoves()
                             isChecked()
                             posSetter()
-                            if(checked === false){
+                            if(blackIsChecked === false){
                                 cancelCheckMoves.push(`${moveRow}${moveCol}`)
                             }
                             checkPieceMoves()
@@ -1048,8 +1072,9 @@ function isCheckmate(){
             }
         }
     })
+    console.log(cancelCheckMoves)
+    posSetter()
 
-    checked = true //LOOK AT THIS
     if(cancelCheckMoves.length===0){
         checkmate = true
         for (const blackpiece of document.querySelectorAll(".blackpiece")) {
@@ -1077,14 +1102,14 @@ function isCheckmate(){
 
         resetBtn.addEventListener("click", function() {
             turn = "white"
-            checked = false
             dragged = ""
             prevBox = ""
-            checkedKing = ""
+            checkedKing =  "'"
             prevCaptured = ""
             prevCapturedContainer = ""
+            whiteIsChecked = false
+            blackIsChecked = false
             captured = false
-            checkmate = false
             checkmate = false
             possibleMoves = {}
             let oldPieces = document.querySelectorAll(`img`)
@@ -1211,15 +1236,13 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-
+                    if(blackIsChecked === true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+                    }
                     moveRecord = `Promoted ${pieceToChange} to Queen`
                     newMove = document.createElement('li')
                     newMove.innerHTML = moveRecord
                     document.getElementById("moveList").appendChild(newMove)
-                    
-                    if(checked===true){
-                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
-                    }
 
                     newQueen.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newQueen.id)
@@ -1244,7 +1267,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(blackIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
 
@@ -1276,7 +1299,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(blackIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
 
@@ -1308,10 +1331,10 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(blackIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
                     }
-
+                
                     moveRecord = `Promoted ${pieceToChange} to Horse`
                     newMove = document.createElement('li')
                     newMove.innerHTML = moveRecord
@@ -1355,7 +1378,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(whiteIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
 
@@ -1387,7 +1410,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(whiteIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
                     
@@ -1419,7 +1442,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-                    if(checked===true){
+                    if(whiteIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
 
@@ -1451,8 +1474,7 @@ function pawnPromotion(promoteTo){
                     posSetter()
                     checkPieceMoves()
                     isChecked()
-
-                    if(checked===true){
+                    if(whiteIsChecked === true){
                         document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
                     }
 
@@ -1476,3 +1498,4 @@ function pawnPromotion(promoteTo){
         }
     })
 }
+
