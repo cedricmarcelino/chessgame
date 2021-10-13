@@ -59,10 +59,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box empty")
-            //const gridLabel = document.createElement('span')
-            //gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            const gridLabel = document.createElement('span')
+            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
-            //box.appendChild(gridLabel)
+            box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
@@ -1202,6 +1202,12 @@ function pawnPromotion(promoteTo){
                     newQueen.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewQ.appendChild(newQueen)
                     disableWhite()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+                    }
 
                     newQueen.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newQueen.id)
@@ -1223,6 +1229,12 @@ function pawnPromotion(promoteTo){
                     newBishop.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewB.appendChild(newBishop)
                     disableWhite()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+                    }
 
                     newBishop.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newBishop.id)
@@ -1244,6 +1256,12 @@ function pawnPromotion(promoteTo){
                     newRook.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewR.appendChild(newRook)
                     disableWhite()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+                    }
 
                     newRook.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newRook.id)
@@ -1265,6 +1283,12 @@ function pawnPromotion(promoteTo){
                     newHorse.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewH.appendChild(newHorse)
                     disableWhite()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `Black's turn, black is checked.`
+                    }
 
                     newHorse.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newHorse.id)
@@ -1298,6 +1322,12 @@ function pawnPromotion(promoteTo){
                     newQueen.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewQ.appendChild(newQueen)
                     disableBlack()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
+                    }
 
                     newQueen.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newQueen.id)
@@ -1319,6 +1349,12 @@ function pawnPromotion(promoteTo){
                     newBishop.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewB.appendChild(newBishop)
                     disableBlack()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
+                    }
 
                     newBishop.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newBishop.id)
@@ -1340,7 +1376,12 @@ function pawnPromotion(promoteTo){
                     newRook.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewR.appendChild(newRook)
                     disableBlack()
-
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
+                    }
                     newRook.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newRook.id)
                         possibleMovesGenerator(newRook)
@@ -1361,6 +1402,12 @@ function pawnPromotion(promoteTo){
                     newHorse.setAttribute("id",`${promoteTo}copy${promoteCounter}`)
                     locOfNewH.appendChild(newHorse)
                     disableBlack()
+                    posSetter()
+                    checkPieceMoves()
+                    isChecked()
+                    if(checked===true){
+                        document.getElementById(`playerTurnLabel`).innerHTML = `White's turn, white is checked.`
+                    }
 
                     newHorse.addEventListener("dragstart", e => {
                         e.dataTransfer.setData("text/plain", newHorse.id)
