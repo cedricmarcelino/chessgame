@@ -23,6 +23,11 @@ let promoteCounter = "1"
 let heldPiece = ""
 let piecePossibleMoves = []
 let pieceOnPossMove = ""
+let passingPawn = ""
+let passingBox = ""
+let leftPiece = `empty`
+let rightPiece = `empty`
+let passingPawnLoc = ``
 
 // GENERATE CHESS BOARD
 function generateBoard() {
@@ -305,81 +310,29 @@ for (const dropZone of document.querySelectorAll(".box")) {
         dropZone.classList.remove("drophover")
         if(possibleMoves[heldPiece] !== undefined) {
             let targetID = e.target.id
-                if(e.target.tagName == 'IMG'){
-                    targetID = e.target.parentElement.id
-                }
-                let targetRow = column[targetID[0]]
-                let targetCol = row[targetID[1]]
-                let boardLoc = targetCol+""+targetRow
-                if(possibleMoves[heldPiece].includes(boardLoc)){
-                    const droppedElementId = e.dataTransfer.getData("text/plain")
-                    const droppedElement = document.getElementById(droppedElementId)
-                    if(blackIsChecked === false && whiteIsChecked === false){
-                        if(board[boardLoc[0]][boardLoc[1]] === "empty"){
-                            board[boardLoc[0]][boardLoc[1]] = heldPiece
-                            dropZone.appendChild(droppedElement)
-                            posSetter()
-                            checkPieceMoves()
-                            isChecked()
-                            if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
-                                move.currentTime = 0
-                                move.play()
-                                pawnPromotionChecker()
-                                updateTurn()
-                                let moveRecord = prevBox.id + " to " + targetID
-                                let newMove = document.createElement('li')
-                                newMove.innerHTML = moveRecord
-                                document.getElementById("moveList").appendChild(newMove)
-                                isCheckmate()
-                                droppedElement.classList.remove("firstmove")
-                            } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
-                                prevBox.appendChild(dragged)
-                                posSetter()
-                                checkPieceMoves()
-                                isChecked()
-                                no.currentTime = 0
-                                no.play()
-                            }
-                        } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
-                            const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
-                            board[boardLoc[0]][boardLoc[1]] = heldPiece
-                            delete possibleMoves[pieceToCapture]
-                            const pieceToCaptureDOM = document.getElementById(pieceToCapture)
-                            pieceToCaptureDOM.remove()
-                            dropZone.appendChild(droppedElement)
-                            posSetter()
-                            checkPieceMoves()
-                            isChecked()
-                            if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
-                                move.currentTime = 0
-                                move.play()
-                                pawnPromotionChecker()
-                                updateTurn()
-                                let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
-                                let newMove = document.createElement('li')
-                                newMove.innerHTML = moveRecord
-                                document.getElementById("moveList").appendChild(newMove)
-                                isCheckmate()
-                                droppedElement.classList.remove("firstmove")
-                            } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
-                                prevBox.appendChild(dragged)
-                                dropZone.appendChild(pieceToCaptureDOM)
-                                board[boardLoc[0]][boardLoc[1]] = pieceToCapture
-                                posSetter()
-                                checkPieceMoves()
-                                isChecked()
-                                no.currentTime = 0
-                                no.play()
-                            }
+            if(e.target.tagName == 'IMG'){
+                targetID = e.target.parentElement.id
+            }
+            let targetRow = column[targetID[0]]
+            let targetCol = row[targetID[1]]
+            let boardLoc = targetCol+""+targetRow
+            if(possibleMoves[heldPiece].includes(boardLoc)){
+                const droppedElementId = e.dataTransfer.getData("text/plain")
+                const droppedElement = document.getElementById(droppedElementId)
+                if(blackIsChecked === false && whiteIsChecked === false){
+                    if(board[boardLoc[0]][boardLoc[1]] === "empty"){
+                        board[boardLoc[0]][boardLoc[1]] = heldPiece
+                        dropZone.appendChild(droppedElement)
+                        if(passingBox === dropZone.id && (droppedElementId.includes(`pawn`))){
+                            delete possibleMoves[passingPawn.id]
+                            passingPawn.remove()
                         }
-                    } else if (whiteIsChecked === true || blackIsChecked === true) {
-                        if(board[boardLoc[0]][boardLoc[1]] === "empty"){
-                            board[boardLoc[0]][boardLoc[1]] = heldPiece
-                            dropZone.appendChild(droppedElement)
-                            posSetter()
-                            checkPieceMoves()
-                            isChecked()
-                            if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false)){
+                        posSetter()
+                        checkPieceMoves()
+                        isChecked()
+                        if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
+
+                            if(droppedElementId !== "kingE1" && droppedElementId !== "kingE8"){
                                 move.currentTime = 0
                                 move.play()
                                 pawnPromotionChecker()
@@ -389,65 +342,332 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 newMove.innerHTML = moveRecord
                                 document.getElementById("moveList").appendChild(newMove)
                                 isCheckmate()
+                                document.querySelectorAll(".pawn").forEach(function (item) {
+                                    item.classList.remove("passing")
+                                    })
+                                passingPawn = ""
+                                passingBox = ""
+                                passingPawnLoc = ""
+                                leftPiece = `empty`
+                                rightPiece = `empty`
+                                if(droppedElement.classList.contains("firstmove") && droppedElement.classList.contains("pawn")){
+                                    if(droppedElement.classList.contains("whitepiece") && dropZone.id.includes(`4`)){
+                                        droppedElement.classList.add("passing")
+                                        passingPawn = droppedElement
+                                        passingPawnLoc = droppedElement.parentElement
+                                        passingBox = targetID[0]+(parseInt(targetID[1])-1)
+                                    }
+                                    else if(droppedElement.classList.contains("blackpiece") && dropZone.id.includes(`5`)){
+                                        droppedElement.classList.add("passing")
+                                        passingPawn = droppedElement
+                                        passingPawnLoc = droppedElement.parentElement
+                                        passingBox = targetID[0]+(parseInt(targetID[1])+1)
+                                    }
+                                }
                                 droppedElement.classList.remove("firstmove")
-                            } else{
-                                prevBox.appendChild(dragged)
-                                posSetter()
-                                checkPieceMoves()
-                                isChecked()
-                                no.currentTime = 0
-                                no.play()
+                            } else {
+                                let blackMovesPossible = []
+                                let whiteMovesPossible = []
+                                for (const piece in possibleMoves) {
+                                    if(piece.includes(`7`) || piece.includes(`8`)){
+                                        possibleMoves[piece].forEach(function(move){
+                                            blackMovesPossible.push(move)
+                                        })
+                                    } 
+                                    if(piece.includes(`1`) || piece.includes(`2`)) {
+                                        possibleMoves[piece].forEach(function(move){
+                                            whiteMovesPossible.push(move)
+                                        })
+                                    }
+                                }
+
+                                if(droppedElementId === "kingE1" && droppedElement.classList.contains(`firstmove`) && (dropZone.id === `G1` || dropZone.id === `C1`)){
+                                    //WHITE RIGHT CASTLING
+                                    if(droppedElementId === "kingE1" && dropZone.id === `G1` && blackMovesPossible.includes(`75`) === false){
+                                        const castledRook = document.getElementById(`rookH1`)
+                                        const castledRookTarget = document.getElementById(`F1`)
+                                        castledRookTarget.appendChild(castledRook)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        move.currentTime = 0
+                                        move.play()
+                                        pawnPromotionChecker()
+                                        updateTurn()
+                                        let moveRecord = prevBox.id + " to " + targetID
+                                        let newMove = document.createElement('li')
+                                        newMove.innerHTML = moveRecord
+                                        document.getElementById("moveList").appendChild(newMove)
+                                        isCheckmate()
+                                        droppedElement.classList.remove("firstmove")
+
+                                    } 
+                                    //WHITE LEFT CASTLING
+                                    else if(droppedElementId === "kingE1" && dropZone.id === `C1` && blackMovesPossible.includes(`73`) === false ){
+                                        const castledRook = document.getElementById(`rookA1`)
+                                        const castledRookTarget = document.getElementById(`D1`)
+                                        castledRookTarget.appendChild(castledRook)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        move.currentTime = 0
+                                        move.play()
+                                        pawnPromotionChecker()
+                                        updateTurn()
+                                        let moveRecord = prevBox.id + " to " + targetID
+                                        let newMove = document.createElement('li')
+                                        newMove.innerHTML = moveRecord
+                                        document.getElementById("moveList").appendChild(newMove)
+                                        isCheckmate()
+                                        droppedElement.classList.remove("firstmove")
+                                    } else {
+                                        prevBox.appendChild(dragged)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        isChecked()
+                                        no.currentTime = 0
+                                        no.play()
+                                    }
+
+
+                                } else if (droppedElementId === "kingE8" && droppedElement.classList.contains(`firstmove`) && (dropZone.id === `G8` || dropZone.id === `C8`)){
+                                    //BLACK RIGHT CASTLING
+                                    if(droppedElementId === "kingE8" && dropZone.id === `G8` && whiteMovesPossible.includes(`05`) === false ) {   
+                                        const castledRook = document.getElementById(`rookH8`)
+                                        const castledRookTarget = document.getElementById(`F8`)
+                                        castledRookTarget.appendChild(castledRook)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        move.currentTime = 0
+                                        move.play()
+                                        pawnPromotionChecker()
+                                        updateTurn()
+                                        let moveRecord = prevBox.id + " to " + targetID
+                                        let newMove = document.createElement('li')
+                                        newMove.innerHTML = moveRecord
+                                        document.getElementById("moveList").appendChild(newMove)
+                                        isCheckmate()
+                                        droppedElement.classList.remove("firstmove")
+                                    } 
+                                    //BLACK LEFT CASTLING
+                                    else if(droppedElementId === "kingE8" && dropZone.id === `C8` && whiteMovesPossible.includes(`03`) === false ) {
+                                        const castledRook = document.getElementById(`rookA8`)
+                                        const castledRookTarget = document.getElementById(`D8`)
+                                        castledRookTarget.appendChild(castledRook)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        move.currentTime = 0
+                                        move.play()
+                                        pawnPromotionChecker()
+                                        updateTurn()
+                                        let moveRecord = prevBox.id + " to " + targetID
+                                        let newMove = document.createElement('li')
+                                        newMove.innerHTML = moveRecord
+                                        document.getElementById("moveList").appendChild(newMove)
+                                        isCheckmate()
+                                        droppedElement.classList.remove("firstmove")
+                                    } else {
+                                        prevBox.appendChild(dragged)
+                                        posSetter()
+                                        checkPieceMoves()
+                                        isChecked()
+                                        no.currentTime = 0
+                                        no.play()
+                                    }
+
+                                } else {
+                                    move.currentTime = 0
+                                    move.play()
+                                    pawnPromotionChecker()
+                                    updateTurn()
+                                    let moveRecord = prevBox.id + " to " + targetID
+                                    let newMove = document.createElement('li')
+                                    newMove.innerHTML = moveRecord
+                                    document.getElementById("moveList").appendChild(newMove)
+                                    isCheckmate()
+                                    droppedElement.classList.remove("firstmove")
+                                }
                             }
-                        } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
-                            const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
-                            board[boardLoc[0]][boardLoc[1]] = heldPiece
-                            delete possibleMoves[pieceToCapture]
-                            const pieceToCaptureDOM = document.getElementById(pieceToCapture)
-                            pieceToCaptureDOM.remove()
-                            dropZone.appendChild(droppedElement)
+                        } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
+                            prevBox.appendChild(dragged)
+                            
+                            if(passingBox === dropZone.id && (droppedElementId.includes(`pawn`))){
+                                passingPawnLoc.appendChild(passingPawn)
+                            }
                             posSetter()
                             checkPieceMoves()
                             isChecked()
-                            if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false) ){
-                                move.currentTime = 0
-                                move.play()
-                                pawnPromotionChecker()
-                                updateTurn()
-                                let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
-                                let newMove = document.createElement('li')
-                                newMove.innerHTML = moveRecord
-                                document.getElementById("moveList").appendChild(newMove)
-                                isCheckmate()
-                                droppedElement.classList.remove("firstmove")
-                            } else{
-                                prevBox.appendChild(dragged)
-                                dropZone.appendChild(pieceToCaptureDOM)
-                                board[boardLoc[0]][boardLoc[1]] = pieceToCapture
-                                posSetter()
-                                checkPieceMoves()
-                                isChecked()
-                                no.currentTime = 0
-                                no.play()
-                            }
+                            no.currentTime = 0
+                            no.play()
+                        }
+                    } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
+                        const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
+                        board[boardLoc[0]][boardLoc[1]] = heldPiece
+                        delete possibleMoves[pieceToCapture]
+                        const pieceToCaptureDOM = document.getElementById(pieceToCapture)
+                        pieceToCaptureDOM.remove()
+                        dropZone.appendChild(droppedElement)
+                        posSetter()
+                        checkPieceMoves()
+                        isChecked()
+                        if((blackIsChecked === false && whiteIsChecked === false) || (turn==="white" && whiteIsChecked === false && blackIsChecked === true) || (turn==="black" && blackIsChecked === false && whiteIsChecked === true)){
+                            move.currentTime = 0
+                            move.play()
+                            pawnPromotionChecker()
+                            updateTurn()
+                            let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
+                            let newMove = document.createElement('li')
+                            newMove.innerHTML = moveRecord
+                            document.getElementById("moveList").appendChild(newMove)
+                            isCheckmate()
+                            
+                            document.querySelectorAll(".pawn").forEach(function (item) {
+                                item.classList.remove("passing")
+                                })
+                            passingPawn = ""
+                            passingPawnLoc = ""
+                            passingBox = ""
+                            leftPiece = `empty`
+                            rightPiece = `empty`
+                            droppedElement.classList.remove("firstmove")
+                        } else if ((turn==="white" && whiteIsChecked === true) || (turn==="black" && blackIsChecked === true)) {
+                            prevBox.appendChild(dragged)
+                            dropZone.appendChild(pieceToCaptureDOM)
+                            board[boardLoc[0]][boardLoc[1]] = pieceToCapture
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            no.currentTime = 0
+                            no.play()
                         }
                     }
-                }else {
-                    no.currentTime = 0
-                    no.play()
+                } else if (whiteIsChecked === true || blackIsChecked === true) {
+                    if(board[boardLoc[0]][boardLoc[1]] === "empty"){
+                        board[boardLoc[0]][boardLoc[1]] = heldPiece
+                        dropZone.appendChild(droppedElement)
+                        posSetter()
+                        checkPieceMoves()
+                        isChecked()
+                        
+                        if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false)){
+                            move.currentTime = 0
+                            move.play()
+                            pawnPromotionChecker()
+                            updateTurn()
+                            let moveRecord = prevBox.id + " to " + targetID
+                            let newMove = document.createElement('li')
+                            newMove.innerHTML = moveRecord
+                            document.getElementById("moveList").appendChild(newMove)
+                            isCheckmate()
+                            document.querySelectorAll(".pawn").forEach(function (item) {
+                                item.classList.remove("passing")
+                                })
+                            passingPawn = ""
+                            passingBox = ""
+                            passingPawnLoc = ""
+                            leftPiece = `empty`
+                            rightPiece = `empty`
+                            if(droppedElement.classList.contains("firstmove") && droppedElement.classList.contains("pawn")){
+                                if(droppedElement.classList.contains("whitepiece") && dropZone.id.includes(`4`)){
+                                    droppedElement.classList.add("passing")
+                                    passingPawn = droppedElement
+                                    passingPawnLoc = droppedElement.parentElement
+                                    passingBox = targetID[0]+(parseInt(targetID[1])-1)
+                                }
+                                else if(droppedElement.classList.contains("blackpiece") && dropZone.id.includes(`5`)){
+                                    droppedElement.classList.add("passing")
+                                    passingPawn = droppedElement
+                                    passingPawnLoc = droppedElement.parentElement
+                                    passingBox = targetID[0]+(parseInt(targetID[1])+1)
+                                }
+                            }
+                            droppedElement.classList.remove("firstmove")
+                        } else{
+                            prevBox.appendChild(dragged)
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            no.currentTime = 0
+                            no.play()
+                        }
+                    } else if(board[boardLoc[0]][boardLoc[1]] !== "empty"){
+                        const pieceToCapture = board[boardLoc[0]][boardLoc[1]]
+                        board[boardLoc[0]][boardLoc[1]] = heldPiece
+                        delete possibleMoves[pieceToCapture]
+                        const pieceToCaptureDOM = document.getElementById(pieceToCapture)
+                        pieceToCaptureDOM.remove()
+                        dropZone.appendChild(droppedElement)
+                        posSetter()
+                        checkPieceMoves()
+                        isChecked()
+                        if((turn==="white" && whiteIsChecked === false) || (turn==="black" && blackIsChecked === false) ){
+                            move.currentTime = 0
+                            move.play()
+                            pawnPromotionChecker()
+                            updateTurn()
+                            let moveRecord = prevBox.id + " to " + dropZone.id + " captures " + pieceToCapture
+                            let newMove = document.createElement('li')
+                            newMove.innerHTML = moveRecord
+                            document.getElementById("moveList").appendChild(newMove)
+                            isCheckmate()
+                            document.querySelectorAll(".pawn").forEach(function (item) {
+                                item.classList.remove("passing")
+                                })
+                            passingPawn = ""    
+                            passingBox = ""
+                            passingPawnLoc = ""
+                            leftPiece = `empty`
+                            rightPiece = `empty`
+                            droppedElement.classList.remove("firstmove")
+                        } else{
+                            prevBox.appendChild(dragged)
+                            dropZone.appendChild(pieceToCaptureDOM)
+                            board[boardLoc[0]][boardLoc[1]] = pieceToCapture
+                            posSetter()
+                            checkPieceMoves()
+                            isChecked()
+                            no.currentTime = 0
+                            no.play()
+                        }
+                    }
                 }
-        } else {
-            no.currentTime = 0
-            no.play()
-        }
-
-        prevCapturedContainer = ""
-        prevCaptured = ""
-        captured = false
-        pieceOnPossMove = ""
-        document.querySelectorAll(".box").forEach(function (item) {
-            item.classList.remove("possibleMove")
+            }else {
+                no.currentTime = 0
+                no.play()
+            }
+    } else {
+        no.currentTime = 0
+        no.play()
+    }
+    posSetter()
+    checkPieceMoves()
+    prevCapturedContainer = ""
+    prevCaptured = ""
+    captured = false
+    pieceOnPossMove = ""
+    document.querySelectorAll(".box").forEach(function (item) {
+        item.classList.remove("possibleMove")
         })
-    })
+
+    if(whiteIsChecked === true && possibleMoves[`kingE1`] !== undefined){
+        if(possibleMoves[`kingE1`].includes(`72`)){
+            const index = possibleMoves[`kingE1`].indexOf(`72`)
+            possibleMoves[`kingE1`].splice(index,1)
+        } else if (possibleMoves[`kingE1`].includes(`76`)){
+            const index = possibleMoves[`kingE1`].indexOf(`76`)
+            possibleMoves[`kingE1`].splice(index,1)
+        }
+    } else if(blackIsChecked === true && possibleMoves[`kingE8`] !== undefined){
+        if(possibleMoves[`kingE8`].includes(`06`)){
+            const index = possibleMoves[`kingE1`].indexOf(`06`)
+            possibleMoves[`kingE8`].splice(index,1)
+        } else if (possibleMoves[`kingE8`].includes(`02`)){
+            const index = possibleMoves[`kingE8`].indexOf(`02`)
+            possibleMoves[`kingE8`].splice(index,1)
+        }
+    }
+
+    
+
+        })
 }
 
 
@@ -471,6 +691,8 @@ function possibleMovesGenerator(piece){
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
   }
+
+
 
 //PAWN MOVE LOGIC
 function checkPawnMoves() {
@@ -521,6 +743,26 @@ function checkPawnMoves() {
                         }
                     }
 
+                    //PASSING CAPTURE UP RIGHT
+                    if(col < 7 && row > 0){
+                        let possibleCapture = document.getElementById(`${board[row][col+1]}`)
+                        if(board[row][col+1] !== "empty"){
+                            if(possibleCapture.classList.contains(`passing`)){
+                                pawnMove.push(`${[row-1]}${[col+1]}`)
+                            }
+                        }
+                    }
+
+                    //PASSING CAPTURE UP LEFT
+                    if(col > 0 && row > 0){
+                        let possibleCapture = document.getElementById(`${board[row][col-1]}`)
+                        if(board[row][col-1] !== "empty"){
+                            if(possibleCapture.classList.contains(`passing`)){
+                                pawnMove.push(`${[row-1]}${[col-1]}`)
+                            }
+                        }
+                    }
+
                     possibleMoves[keyName] = pawnMove
                 } else if (piece.classList.contains("blackpiece") && piece.classList.contains("pawn")) {
                     let pieceMove = []
@@ -564,7 +806,25 @@ function checkPawnMoves() {
                         }
                     }
 
-                    
+                    //PASSING DOWN LEFT CAPTURE
+                    if(col > 0 && row < 7){
+                        let possibleCapture = document.getElementById(`${board[row][col-1]}`)
+                        if(board[row][col-1] !== "empty"){
+                            if(possibleCapture.classList.contains(`passing`)){
+                                pawnMove.push(`${[row+1]}${[col-1]}`)
+                            }
+                        }
+                    }
+                    //PASSING DOWN RIGHT CAPTURE
+                    if(col < 7 && row < 7){
+                        let possibleCapture = document.getElementById(`${board[row][col+1]}`)
+                        if(board[row][col+1] !== "empty"){
+                            if(possibleCapture.classList.contains(`passing`)){
+                                pawnMove.push(`${[row+1]}${[col+1]}`)
+                            }
+                        }
+                    }
+    
                     possibleMoves[keyName] = pawnMove
                 }
             }
@@ -692,6 +952,28 @@ function checkKingMoves() {
                             kingsMove.push(pieceMove[0])
                             pieceMove = []
                         }
+
+                        if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookH1`).classList.contains("firstmove") && board[7][5] === `empty` && board[7][6] === `empty`  ){
+                            kingsMove.push(`76`)
+                            pieceMove = []
+                        }
+
+                        if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookA1`).classList.contains("firstmove") && board[7][1] === `empty` && board[7][2] === `empty` && board[7][3] === `empty` ){
+                            kingsMove.push(`72`)
+                            pieceMove = []
+                        }
+
+                        if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookH8`).classList.contains("firstmove") && board[0][5] === `empty` && board[0][6] === `empty`  ){
+                            kingsMove.push(`06`)
+                            pieceMove = []
+                        }
+
+                        if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookA8`).classList.contains("firstmove") && board[0][1] === `empty` && board[0][2] === `empty` && board[0][3] === `empty` ){
+                            kingsMove.push(`02`)
+                            pieceMove = []
+                        }
+
+
                         
                         possibleMoves[keyName] = kingsMove
                     } 
@@ -811,8 +1093,8 @@ function checkPieceMoves(){
     checkRookMoves()
     checkBishopMoves()
     checkQueenMoves()
-    checkKingMoves()
     checkHorseMoves()
+    checkKingMoves()
     removePieceWithNoMoves()
 }
 
@@ -998,7 +1280,6 @@ function isChecked() {
     }else if (piecesOnPossMove.includes("kingE8") === false){
         blackIsChecked = false
     }
-    
 }
 
 function isCheckmate(){
@@ -1072,7 +1353,6 @@ function isCheckmate(){
             }
         }
     })
-    console.log(cancelCheckMoves)
     posSetter()
 
     if(cancelCheckMoves.length===0){
@@ -1499,3 +1779,55 @@ function pawnPromotion(promoteTo){
     })
 }
 
+
+// document.querySelectorAll(".pawn").forEach(function (item) {
+//     if(item.classList.contains("passing")){
+//         const boxID = dropZone.id
+//         let boardRow = parseInt(column[boxID[0]])
+//         let boardCol = parseInt(row[boxID[1]])
+        
+        
+//         if(board[boardCol][boardRow-1] !== undefined && board[boardCol][boardRow-1] !== `empty`){
+//             leftPiece = board[boardCol][boardRow-1]
+//             console.log(leftPiece)
+//         }
+
+//         if(board[boardCol][boardRow+1] !== undefined && board[boardCol][boardRow+1] !== `empty`){
+//             rightPiece = board[boardCol][boardRow+1]
+//             console.log(rightPiece)
+//         }
+
+//         if(item.id.includes(`2`)){
+//             if(leftPiece.includes(`pawn`) && leftPiece.includes(`7`)){
+//                 if(possibleMoves[leftPiece] !== undefined){
+//                     possibleMoves[leftPiece].push(`${boardCol+1}${boardRow}`)
+//                 } else {
+//                     possibleMoves[leftPiece] = [`${boardCol+1}${boardRow}`]
+//                 }
+//             } 
+//             if(rightPiece.includes(`pawn`) && rightPiece.includes(`7`)){
+//                 if(possibleMoves[rightPiece] !== undefined){
+//                     possibleMoves[rightPiece].push(`${boardCol+1}${boardRow}`)
+//                 } else {
+//                     possibleMoves[rightPiece] = [`${boardCol+1}${boardRow}`]
+//                 }
+//             }
+//         } else if (item.id.includes(`7`)) {
+//             if(leftPiece.includes(`pawn`) && leftPiece.includes(`2`)){
+//                 if(possibleMoves[leftPiece] !== undefined){
+//                     possibleMoves[leftPiece].push(`${boardCol-1}${boardRow}`)
+//                 } else {
+//                     possibleMoves[leftPiece] = [`${boardCol-1}${boardRow}`]
+//                 }
+//             } 
+
+//             if(rightPiece.includes(`pawn`) && rightPiece.includes(`2`)){
+//                 if(possibleMoves[rightPiece] !== undefined){
+//                     possibleMoves[rightPiece].push(`${boardCol-1}${boardRow}`)
+//                 } else {
+//                     possibleMoves[rightPiece] = [`${boardCol-1}${boardRow}`]
+//                 }
+//             }
+//         }
+//     }
+//     })
