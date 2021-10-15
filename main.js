@@ -305,6 +305,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
     })
 
     dropZone.addEventListener("drop", e=>{ 
+        e.preventDefault()
         const droppedElementId = e.dataTransfer.getData("text/plain")
         const droppedElement = document.getElementById(droppedElementId)
         dropZone.classList.remove("drophover")
