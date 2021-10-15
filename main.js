@@ -65,10 +65,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box empty")
-            //const gridLabel = document.createElement('span')
-            //gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            const gridLabel = document.createElement('span')
+            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
-            //box.appendChild(gridLabel)
+            box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
@@ -952,25 +952,30 @@ function checkKingMoves() {
                             kingsMove.push(pieceMove[0])
                             pieceMove = []
                         }
-
-                        if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookH1`).classList.contains("firstmove") && board[7][5] === `empty` && board[7][6] === `empty`  ){
-                            kingsMove.push(`76`)
-                            pieceMove = []
+                        //if() add condition if rook is gone
+                        if(!!document.getElementById(`rookH1`)){
+                            if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookH1`).classList.contains("firstmove") && board[7][5] === `empty` && board[7][6] === `empty`  ){
+                                kingsMove.push(`76`)
+                                pieceMove = []
+                            }
                         }
-
-                        if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookA1`).classList.contains("firstmove") && board[7][1] === `empty` && board[7][2] === `empty` && board[7][3] === `empty` ){
-                            kingsMove.push(`72`)
-                            pieceMove = []
+                        if(!!document.getElementById(`rookA1`)){
+                            if(piece.id === "kingE1" && piece.classList.contains("firstmove") && document.getElementById(`rookA1`).classList.contains("firstmove") && board[7][1] === `empty` && board[7][2] === `empty` && board[7][3] === `empty` ){
+                                kingsMove.push(`72`)
+                                pieceMove = []
+                            }
                         }
-
-                        if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookH8`).classList.contains("firstmove") && board[0][5] === `empty` && board[0][6] === `empty`  ){
-                            kingsMove.push(`06`)
-                            pieceMove = []
+                        if(!!document.getElementById(`rookH8`)){
+                            if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookH8`).classList.contains("firstmove") && board[0][5] === `empty` && board[0][6] === `empty`  ){
+                                kingsMove.push(`06`)
+                                pieceMove = []                      
+                            }
                         }
-
-                        if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookA8`).classList.contains("firstmove") && board[0][1] === `empty` && board[0][2] === `empty` && board[0][3] === `empty` ){
-                            kingsMove.push(`02`)
-                            pieceMove = []
+                        if(!!document.getElementById(`rookA8`)){
+                            if(piece.id === "kingE8" && piece.classList.contains("firstmove") && document.getElementById(`rookA8`).classList.contains("firstmove") && board[0][1] === `empty` && board[0][2] === `empty` && board[0][3] === `empty` ){
+                                kingsMove.push(`02`)
+                                pieceMove = []
+                            }                           
                         }
 
 
