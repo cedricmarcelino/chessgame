@@ -65,10 +65,10 @@ function generateBoard() {
             const box = document.createElement('div')
             box.setAttribute("id",`${columnLabel[col]}${rowLabel[row]}`)
             box.setAttribute("class","box empty")
-            const gridLabel = document.createElement('span')
-            gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
+            //const gridLabel = document.createElement('span')
+            //gridLabel.innerHTML = `${columnLabel[col]}${rowLabel[row]}`
             rowContainer.appendChild(box)
-            box.appendChild(gridLabel)
+            //box.appendChild(gridLabel)
             if(row%2===0){
                 if(counter%2===0){
                     box.classList.add("darkbox")
