@@ -648,7 +648,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
         item.classList.remove("possibleMove")
         })
 
-    if(whiteIsChecked === true && possibleMoves[`kingE1`] !== undefined){
+    if(whiteIsChecked === true && possibleMoves[`kingE1`] !== undefined && document.getElementById(`kingE1`).classList.contains(`firstmove`) === true){
         if(possibleMoves[`kingE1`].includes(`72`)){
             const index = possibleMoves[`kingE1`].indexOf(`72`)
             possibleMoves[`kingE1`].splice(index,1)
@@ -656,7 +656,7 @@ for (const dropZone of document.querySelectorAll(".box")) {
             const index = possibleMoves[`kingE1`].indexOf(`76`)
             possibleMoves[`kingE1`].splice(index,1)
         }
-    } else if(blackIsChecked === true && possibleMoves[`kingE8`] !== undefined){
+    } else if(blackIsChecked === true && possibleMoves[`kingE8`] !== undefined && document.getElementById(`kingE8`).classList.contains(`firstmove`) === true){
         if(possibleMoves[`kingE8`].includes(`06`)){
             const index = possibleMoves[`kingE1`].indexOf(`06`)
             possibleMoves[`kingE8`].splice(index,1)
