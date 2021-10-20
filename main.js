@@ -342,7 +342,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                 let newMove = document.createElement('li')
                                 newMove.innerHTML = moveRecord
                                 document.getElementById("moveList").appendChild(newMove)
-                                isCheckmate()
+                                if(whiteIsChecked === true || blackIsChecked === true){
+                                    isCheckmate()
+                                }
+                                if(whiteIsChecked === false && blackIsChecked === false){
+                                    isStalemate()
+                                }
                                 document.querySelectorAll(".pawn").forEach(function (item) {
                                     item.classList.remove("passing")
                                     })
@@ -398,7 +403,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                         let newMove = document.createElement('li')
                                         newMove.innerHTML = moveRecord
                                         document.getElementById("moveList").appendChild(newMove)
-                                        isCheckmate()
+                                        if(whiteIsChecked === true || blackIsChecked === true){
+                                            isCheckmate()
+                                        }
+                                        if(whiteIsChecked === false && blackIsChecked === false){
+                                            isStalemate()
+                                        }
                                         droppedElement.classList.remove("firstmove")
 
                                     } 
@@ -417,7 +427,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                         let newMove = document.createElement('li')
                                         newMove.innerHTML = moveRecord
                                         document.getElementById("moveList").appendChild(newMove)
-                                        isCheckmate()
+                                        if(whiteIsChecked === true || blackIsChecked === true){
+                                            isCheckmate()
+                                        }
+                                        if(whiteIsChecked === false && blackIsChecked === false){
+                                            isStalemate()
+                                        }
                                         droppedElement.classList.remove("firstmove")
                                     } else {
                                         prevBox.appendChild(dragged)
@@ -445,7 +460,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                         let newMove = document.createElement('li')
                                         newMove.innerHTML = moveRecord
                                         document.getElementById("moveList").appendChild(newMove)
-                                        isCheckmate()
+                                        if(whiteIsChecked === true || blackIsChecked === true){
+                                            isCheckmate()
+                                        }
+                                        if(whiteIsChecked === false && blackIsChecked === false){
+                                            isStalemate()
+                                        }
                                         droppedElement.classList.remove("firstmove")
                                     } 
                                     //BLACK LEFT CASTLING
@@ -463,7 +483,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                         let newMove = document.createElement('li')
                                         newMove.innerHTML = moveRecord
                                         document.getElementById("moveList").appendChild(newMove)
-                                        isCheckmate()
+                                        if(whiteIsChecked === true || blackIsChecked === true){
+                                            isCheckmate()
+                                        }
+                                        if(whiteIsChecked === false && blackIsChecked === false){
+                                            isStalemate()
+                                        }
                                         droppedElement.classList.remove("firstmove")
                                     } else {
                                         prevBox.appendChild(dragged)
@@ -483,7 +508,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                                     let newMove = document.createElement('li')
                                     newMove.innerHTML = moveRecord
                                     document.getElementById("moveList").appendChild(newMove)
-                                    isCheckmate()
+                                    if(whiteIsChecked === true || blackIsChecked === true){
+                                        isCheckmate()
+                                    }
+                                    if(whiteIsChecked === false && blackIsChecked === false){
+                                        isStalemate()
+                                    }
                                     droppedElement.classList.remove("firstmove")
                                 }
                             }
@@ -518,7 +548,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                             let newMove = document.createElement('li')
                             newMove.innerHTML = moveRecord
                             document.getElementById("moveList").appendChild(newMove)
-                            isCheckmate()
+                            if(whiteIsChecked === true || blackIsChecked === true){
+                                isCheckmate()
+                            }
+                            if(whiteIsChecked === false && blackIsChecked === false){
+                                isStalemate()
+                            }
                             
                             document.querySelectorAll(".pawn").forEach(function (item) {
                                 item.classList.remove("passing")
@@ -557,7 +592,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                             let newMove = document.createElement('li')
                             newMove.innerHTML = moveRecord
                             document.getElementById("moveList").appendChild(newMove)
-                            isCheckmate()
+                            if(whiteIsChecked === true || blackIsChecked === true){
+                                isCheckmate()
+                            }
+                            if(whiteIsChecked === false && blackIsChecked === false){
+                                isStalemate()
+                            }
                             document.querySelectorAll(".pawn").forEach(function (item) {
                                 item.classList.remove("passing")
                                 })
@@ -608,7 +648,12 @@ for (const dropZone of document.querySelectorAll(".box")) {
                             let newMove = document.createElement('li')
                             newMove.innerHTML = moveRecord
                             document.getElementById("moveList").appendChild(newMove)
-                            isCheckmate()
+                            if(whiteIsChecked === true || blackIsChecked === true){
+                                isCheckmate()
+                            }
+                            if(whiteIsChecked === false && blackIsChecked === false){
+                                isStalemate()
+                            }
                             document.querySelectorAll(".pawn").forEach(function (item) {
                                 item.classList.remove("passing")
                                 })
@@ -1387,6 +1432,8 @@ function isCheckmate(){
         resetBtnWrapper.appendChild(resetBtn)
 
         resetBtn.addEventListener("click", function() {
+            win.pause()
+            win.currentTime = 0
             turn = "white"
             dragged = ""
             prevBox = ""
@@ -1398,6 +1445,15 @@ function isCheckmate(){
             captured = false
             checkmate = false
             possibleMoves = {}
+            promoteCounter = "1"
+            heldPiece = ""
+            piecePossibleMoves = []
+            pieceOnPossMove = ""
+            passingPawn = ""
+            passingBox = ""
+            leftPiece = `empty`
+            rightPiece = `empty`
+            passingPawnLoc = ``
             let oldPieces = document.querySelectorAll(`img`)
             oldPieces.forEach(function (item){
                 item.remove()
@@ -1783,4 +1839,190 @@ function pawnPromotion(promoteTo){
             }
         }
     })
+}
+
+function isStalemate(){
+    const possibleMovesKeys = Object.keys(possibleMoves)
+    let blackPieces = {}
+    let whitePieces = {}
+    let pieceCurrLoc = {}
+
+    possibleMovesKeys.forEach(function (item){
+        const piece = document.getElementById(item)
+        if(piece.classList.contains(`whitepiece`)){
+            whitePieces[item] = possibleMoves[item]
+        } else if(piece.classList.contains(`blackpiece`)){
+            blackPieces[item] = possibleMoves[item]
+        }
+
+        for(let row = 0; row < 8; row++){
+            for(let col = 0; col < 8; col++){
+                if(item === board[row][col]){
+                    pieceCurrLoc[item] = `${row}${col}`
+                }
+            }
+        }
+    })
+    
+    const whitePieceKey = Object.keys(whitePieces)
+    const blackPieceKey = Object.keys(blackPieces)
+
+    whitePieceKey.forEach(function(item){
+        const numOfMoves = whitePieces[item].length
+        for(let i = numOfMoves-1; i >= 0; i--){
+            board[pieceCurrLoc[item][0]][pieceCurrLoc[item][1]] = `empty`
+            board[whitePieces[item][i][0]][whitePieces[item][i][1]] = item
+            checkPieceMoves()
+            isChecked()
+            if(whiteIsChecked){
+                whitePieces[item].splice(i, 1)
+            }
+            posSetter()
+            isChecked()
+        }
+    })
+
+    blackPieceKey.forEach(function(item){
+        const numOfMoves = blackPieces[item].length
+        for(let i = numOfMoves-1; i >= 0; i--){
+            board[pieceCurrLoc[item][0]][pieceCurrLoc[item][1]] = `empty`
+            board[blackPieces[item][i][0]][blackPieces[item][i][1]] = item
+            checkPieceMoves()
+            isChecked()
+            if(blackIsChecked){
+                blackPieces[item].splice(i, 1)
+            }
+            posSetter()
+            isChecked()
+        }
+    })
+
+    whitePieceKey.forEach(function(item){
+        if(whitePieces[item].length===0){
+            delete whitePieces[item]
+        }
+    })
+
+    blackPieceKey.forEach(function(item){
+        if(blackPieces[item].length===0){
+            delete blackPieces[item]
+        }
+    })
+    
+    if(turn===`black` && Object.keys(blackPieces).length === 0){
+        for (const blackpiece of document.querySelectorAll(".blackpiece")) {
+            blackpiece.setAttribute("draggable", "false")
+        }
+        for (const whitepiece of document.querySelectorAll(".whitepiece")) {
+            whitepiece.setAttribute("draggable", "false")
+        }
+        document.getElementById(`playerTurnLabel`).innerHTML = `Stalemate!`
+        win.currentTime = 0
+        win.play()
+        const resetBtnWrapper = document.createElement(`div`)
+        resetBtnWrapper.setAttribute(`id`,`resetBtnWrapper`)
+        body.appendChild(resetBtnWrapper)
+        const resetBtn = document.createElement(`button`)
+        resetBtn.setAttribute(`id`,`resetBtn`)
+        resetBtn.innerHTML = "New Game"
+        resetBtnWrapper.appendChild(resetBtn)
+    
+        resetBtn.addEventListener("click", function() {
+            win.pause()
+            win.currentTime = 0
+            turn = "white"
+            dragged = ""
+            prevBox = ""
+            checkedKing =  "'"
+            prevCaptured = ""
+            prevCapturedContainer = ""
+            whiteIsChecked = false
+            blackIsChecked = false
+            captured = false
+            checkmate = false
+            possibleMoves = {}
+            promoteCounter = "1"
+            heldPiece = ""
+            piecePossibleMoves = []
+            pieceOnPossMove = ""
+            passingPawn = ""
+            passingBox = ""
+            leftPiece = `empty`
+            rightPiece = `empty`
+            passingPawnLoc = ``
+            let oldPieces = document.querySelectorAll(`img`)
+            oldPieces.forEach(function (item){
+                item.remove()
+            })
+            generatePieces()
+            resetBoard ()
+            posSetter()
+            checkPieceMoves()
+            disableBlack()
+            document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
+            document.getElementById(`moveList`).innerHTML = ``
+            resetBtnWrapper.remove()
+            if(rotated===true){
+                rotate()
+            }
+        })
+    } else if (turn===`white` && Object.keys(whitePieces).length === 0){
+        for (const blackpiece of document.querySelectorAll(".blackpiece")) {
+            blackpiece.setAttribute("draggable", "false")
+        }
+        for (const whitepiece of document.querySelectorAll(".whitepiece")) {
+            whitepiece.setAttribute("draggable", "false")
+        }
+        document.getElementById(`playerTurnLabel`).innerHTML = `Stalemate!`
+        win.currentTime = 0
+        win.play()
+        const resetBtnWrapper = document.createElement(`div`)
+        resetBtnWrapper.setAttribute(`id`,`resetBtnWrapper`)
+        body.appendChild(resetBtnWrapper)
+        const resetBtn = document.createElement(`button`)
+        resetBtn.setAttribute(`id`,`resetBtn`)
+        resetBtn.innerHTML = "New Game"
+        resetBtnWrapper.appendChild(resetBtn)
+    
+        resetBtn.addEventListener("click", function() {
+            win.pause()
+            win.currentTime = 0
+            turn = "white"
+            dragged = ""
+            prevBox = ""
+            checkedKing =  "'"
+            prevCaptured = ""
+            prevCapturedContainer = ""
+            whiteIsChecked = false
+            blackIsChecked = false
+            captured = false
+            checkmate = false
+            possibleMoves = {}
+            promoteCounter = "1"
+            heldPiece = ""
+            piecePossibleMoves = []
+            pieceOnPossMove = ""
+            passingPawn = ""
+            passingBox = ""
+            leftPiece = `empty`
+            rightPiece = `empty`
+            passingPawnLoc = ``
+            let oldPieces = document.querySelectorAll(`img`)
+            oldPieces.forEach(function (item){
+                item.remove()
+            })
+            generatePieces()
+            resetBoard ()
+            posSetter()
+            checkPieceMoves()
+            disableBlack()
+            document.getElementById(`playerTurnLabel`).innerHTML = `White's turn`
+            document.getElementById(`moveList`).innerHTML = ``
+            resetBtnWrapper.remove()
+            if(rotated===true){
+                rotate()
+            }
+        })
+    }
+
 }
